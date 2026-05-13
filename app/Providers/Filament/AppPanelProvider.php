@@ -93,7 +93,7 @@ final class AppPanelProvider extends PanelProvider
 
         $panel
             ->homeUrl(fn (): string => CompanyResource::getUrl())
-            ->brandName('Enterprise Movement')
+            ->brandName('')
             ->brandLogo(fn (): View|Factory => Auth::user()?->hasVerifiedEmail()
                 ? view('filament.app.logo-empty')
                 : view('filament.app.logo'))
