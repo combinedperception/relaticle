@@ -14,9 +14,18 @@
 @source '../../../../vendor/relaticle/custom-fields/resources';
 
 /* ===================================
-   Relaticle Brand Theme Customization
-   Pure Tailwind CSS Classes Only
+   Enterprise Movement Brand Theme
    =================================== */
+
+/* EM Brand Tokens */
+:root {
+    --em-navy:        #172343;
+    --em-navy-light:  #1e2f54;
+    --em-navy-hover:  #243566;
+    --em-blue:        #6171F7;
+    --em-cyan:        #10BAE9;
+    --em-white:       #FBF7F7;
+}
 
 /* App Panel Custom Layout */
 .fi-app-layout {
@@ -26,19 +35,20 @@
 .fi-app-main-wrapper {
     @apply flex-1 flex flex-col min-w-0;
 
-    /* Only the content area scrolls, not the topbar */
     > .fi-layout {
         @apply flex-1 overflow-y-auto;
     }
 }
 
 .fi-header-heading {
-    @apply text-2xl font-bold;
+    font-family: 'Archivo Black', system-ui, sans-serif;
+    @apply text-2xl font-bold tracking-tight;
 }
 
-/* Sidebar Enhancements */
+/* ─── Dark Navy Sidebar ─────────────────────────────────── */
 .fi-sidebar {
-    @apply bg-gray-50 border-r border-gray-200 dark:bg-gray-800 dark:border-gray-800;
+    background-color: var(--em-navy) !important;
+    border-right-color: var(--em-navy-light) !important;
 
     .fi-dropdown-list-item-image {
         @apply rounded-md;
@@ -46,14 +56,27 @@
 }
 
 .fi-sidebar-nav {
-    @apply space-y-1 pt-2.5;
+    @apply space-y-0.5 pt-2;
+}
+
+.fi-sidebar-header {
+    background-color: var(--em-navy) !important;
+    border-bottom-color: var(--em-navy-light) !important;
 }
 
 .fi-sidebar-item {
-    @apply transition-colors duration-200 ease-in-out;
+    @apply transition-all duration-150 ease-in-out;
 
     .fi-sidebar-item-btn {
-        @apply dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800;
+        color: rgba(251, 247, 247, 0.70) !important;
+        border-radius: 0.5rem;
+        margin-inline: 0.5rem;
+
+        &:hover {
+            background-color: var(--em-navy-hover) !important;
+            color: var(--em-white) !important;
+        }
+
         padding-block: calc(var(--spacing) * 1.7);
     }
 
@@ -65,13 +88,25 @@
     .fi-sidebar-item-grouped-border {
         width: calc(var(--spacing) * 5);
         height: calc(var(--spacing) * 5);
+        border-color: var(--em-navy-light) !important;
     }
 }
 
 .fi-sidebar-item.fi-active {
     > .fi-sidebar-item-btn {
-        @apply bg-gray-100 dark:bg-gray-800 font-semibold;
+        background-color: rgba(97, 113, 247, 0.20) !important;
+        color: var(--em-white) !important;
+        font-weight: 600;
+
+        .fi-sidebar-item-icon {
+            color: var(--em-blue) !important;
+        }
     }
+}
+
+.fi-sidebar-group-label {
+    color: rgba(251, 247, 247, 0.40) !important;
+    @apply text-xs font-semibold uppercase tracking-widest px-3 pt-4 pb-1;
 }
 
 .fi-sidebar-group {
@@ -82,9 +117,29 @@
     @apply rounded-xl;
 }
 
-/* Top Navigation Bar */
+/* Tenant & user menus in sidebar */
+.fi-tenant-menu-trigger,
+.fi-user-menu-trigger {
+    color: rgba(251, 247, 247, 0.80) !important;
+
+    &:hover {
+        background-color: var(--em-navy-hover) !important;
+        color: var(--em-white) !important;
+    }
+}
+
+.fi-sidebar-collapsible-btn {
+    color: rgba(251, 247, 247, 0.50) !important;
+
+    &:hover {
+        color: var(--em-white) !important;
+    }
+}
+
+/* ─── Top Navigation Bar ────────────────────────────────── */
 .fi-topbar {
-    @apply min-h-14;
+    @apply min-h-14 border-b border-gray-200 dark:border-gray-800;
+    @apply bg-white dark:bg-gray-900;
 }
 
 .fi-topbar nav {
@@ -153,7 +208,11 @@
 }
 
 .fi-ta-table thead {
-    @apply bg-gradient-to-r from-gray-50 to-gray-100 dark:from-gray-800 dark:to-gray-900;
+    @apply bg-gradient-to-r from-gray-50 to-gray-100 dark:from-gray-900 dark:to-gray-900;
+}
+
+.fi-ta-header-cell {
+    color: var(--em-navy) !important;
 }
 
 /* Table header actions */
@@ -252,28 +311,28 @@
 
 /* Custom Scrollbar Styling */
 .fi-sidebar {
-    @apply h-full bg-white dark:bg-gray-900;
+    @apply h-full;
     scrollbar-width: thin;
-    scrollbar-color: theme('colors.gray.400') theme('colors.gray.100');
+    scrollbar-color: var(--em-navy-hover) var(--em-navy);
 }
 
-/* Sidebar scrollable content area */
 .fi-sidebar-nav {
     @apply overflow-y-auto overflow-x-hidden;
     scrollbar-width: thin;
-    scrollbar-color: theme('colors.gray.400') theme('colors.gray.100');
+    scrollbar-color: var(--em-navy-hover) var(--em-navy);
 }
 
 .fi-sidebar::-webkit-scrollbar {
-    @apply w-2;
+    @apply w-1;
 }
 
 .fi-sidebar::-webkit-scrollbar-track {
-    @apply bg-gray-100 dark:bg-gray-800;
+    background: var(--em-navy);
 }
 
 .fi-sidebar::-webkit-scrollbar-thumb {
-    @apply bg-gray-400 dark:bg-gray-600 rounded-full hover:bg-gray-500 dark:hover:bg-gray-500;
+    background: var(--em-navy-hover);
+    border-radius: 9999px;
 }
 
 /* Additional Component Polish */

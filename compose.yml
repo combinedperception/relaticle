@@ -5,7 +5,7 @@ services:
     ports:
       - "127.0.0.1:8080:8080"
     environment:
-      APP_NAME: ${APP_NAME:-Relaticle}
+      APP_NAME: ${APP_NAME:-Enterprise Movement CRM}
       APP_ENV: ${APP_ENV:-production}
       APP_KEY: ${APP_KEY:?APP_KEY is required}
       APP_DEBUG: ${APP_DEBUG:-false}
@@ -59,7 +59,7 @@ services:
     command: ["php", "/var/www/html/artisan", "horizon"]
     stop_signal: SIGTERM
     environment:
-      APP_NAME: ${APP_NAME:-Relaticle}
+      APP_NAME: ${APP_NAME:-Enterprise Movement CRM}
       APP_ENV: ${APP_ENV:-production}
       APP_KEY: ${APP_KEY:?APP_KEY is required}
       APP_DEBUG: ${APP_DEBUG:-false}
@@ -96,7 +96,7 @@ services:
     command: ["php", "/var/www/html/artisan", "schedule:work"]
     stop_signal: SIGTERM
     environment:
-      APP_NAME: ${APP_NAME:-Relaticle}
+      APP_NAME: ${APP_NAME:-Enterprise Movement CRM}
       APP_ENV: ${APP_ENV:-production}
       APP_KEY: ${APP_KEY:?APP_KEY is required}
       APP_DEBUG: ${APP_DEBUG:-false}
