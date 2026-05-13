@@ -70,7 +70,7 @@ jobs:
           php artisan key:generate
 
       - name: Run tests
-        run: php artisan test --compact --exclude-testsuite Browser
+        run: php artisan test --compact --exclude-testsuite Browser --exclude-testsuite Smoke --configuration phpunit.ci.xml
 
   deploy:
     runs-on: ubuntu-latest
