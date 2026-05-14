@@ -422,6 +422,17 @@
     @apply rounded-xl;
 }
 
+/* CRM Assistant — dashboard animations */
+@keyframes fade-slide-in {
+    from { opacity: 0; transform: translateX(-8px); }
+    to   { opacity: 1; transform: translateX(0); }
+}
+
+@keyframes count-up-fade {
+    from { opacity: 0; transform: translateY(4px); }
+    to   { opacity: 1; transform: translateY(0); }
+}
+
 /* Account Widget */
 .fi-account-widget {
     @apply rounded-xl;
