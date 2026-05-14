@@ -12,8 +12,8 @@ return new class extends Migration
     {
         Schema::create('agent_runs', function (Blueprint $table): void {
             $table->id();
-            $table->foreignId('team_id')->constrained()->cascadeOnDelete();
-            $table->foreignId('user_id')->constrained()->cascadeOnDelete();
+            $table->foreignUlid('team_id')->constrained()->cascadeOnDelete();
+            $table->foreignUlid('user_id')->constrained()->cascadeOnDelete();
             $table->enum('status', ['pending', 'running', 'completed', 'failed'])->default('pending');
             $table->jsonb('steps')->default('[]');
             $table->text('summary')->nullable();
