@@ -2,6 +2,7 @@
 
 declare(strict_types=1);
 
+use App\Http\Middleware\SecurityHeaders;
 use App\Http\Middleware\SetApiTeamContext;
 use App\Http\Middleware\SubdomainRootResponse;
 use App\Http\Middleware\ValidateSignature;
@@ -51,6 +52,7 @@ return Application::configure(basePath: dirname(__DIR__))
         ]);
 
         $middleware->prepend(SubdomainRootResponse::class);
+        $middleware->appendToGroup('web', SecurityHeaders::class);
 
         $middleware->prependToPriorityList(
             before: SubstituteBindings::class,
