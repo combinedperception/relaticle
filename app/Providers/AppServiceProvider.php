@@ -10,6 +10,8 @@ use App\Listeners\Email\NewSubscriberListener;
 use App\Listeners\Email\RecordLoginTimestampListener;
 use App\Listeners\Email\TeamCreatedTagListener;
 use App\Listeners\Email\TeamMemberAddedListener;
+use App\Listeners\LogAccountLockout;
+use App\Listeners\LogFailedLogin;
 use App\Models\Company;
 use App\Models\CustomField;
 use App\Models\CustomFieldOption;
@@ -26,6 +28,8 @@ use App\Models\User;
 use App\Services\GitHubService;
 use Filament\Actions\Action;
 use Filament\Facades\Filament;
+use Illuminate\Auth\Events\Failed;
+use Illuminate\Auth\Events\Lockout;
 use Illuminate\Auth\Events\Login;
 use Illuminate\Auth\Events\Verified;
 use Illuminate\Cache\RateLimiting\Limit;
@@ -69,6 +73,8 @@ final class AppServiceProvider extends ServiceProvider
         }
 
         Event::listen(Login::class, RecordLoginTimestampListener::class);
+        Event::listen(Failed::class, LogFailedLogin::class);
+        Event::listen(Lockout::class, LogAccountLockout::class);
         Event::listen(Verified::class, NewSubscriberListener::class);
         Event::listen(TeamMemberAdded::class, TeamMemberAddedListener::class);
         Event::listen(TeamCreated::class, TeamCreatedTagListener::class);
