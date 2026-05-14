@@ -80,8 +80,18 @@
             </div>
         </div>
 
-        <div class="mt-8 flex flex-col md:flex-row md:justify-between items-center gap-4">
-            <p class="text-gray-500 dark:text-gray-400 text-xs">&copy; {{ date('Y') }} Combined Perception. All rights reserved.</p>
+        <div class="mt-8 flex flex-col md:flex-row md:justify-between items-start md:items-center gap-3">
+            <div>
+                <p class="text-gray-500 dark:text-gray-400 text-xs">&copy; {{ date('Y') }} Combined Perception. All rights reserved.</p>
+                <p class="text-gray-400 dark:text-gray-600 text-[11px] mt-1">
+                    Built on the foundations of
+                    <a href="https://github.com/relaticle/relaticle" target="_blank" rel="noopener"
+                       class="underline underline-offset-2 hover:text-gray-500 dark:hover:text-gray-400 transition-colors">
+                        Relaticle
+                    </a>
+                    open-source (AGPL-3.0).
+                </p>
+            </div>
             <x-theme-switcher />
         </div>
     </div>

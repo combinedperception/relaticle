@@ -1,7 +1,7 @@
 <!doctype html>
 <html>
 <head>
-    <title>Relaticle API</title>
+    <title>Combined Perception API</title>
     <meta charset="utf-8"/>
     <meta
         name="viewport"
@@ -85,8 +85,8 @@
 
 <nav class="relaticle-nav">
     <div class="relaticle-nav-left">
-        <a href="/" aria-label="Relaticle Home">
-            <img src="/brand/logomark.svg" alt="Relaticle" style="height:1.25rem;width:1.25rem;"/>
+        <a href="/" aria-label="Combined Perception Home">
+            <img src="/brand/logomark.svg" alt="Combined Perception" style="height:1.25rem;width:1.25rem;"/>
         </a>
         <div class="relaticle-nav-sep"></div>
         <span class="relaticle-nav-title">API Reference</span>
@@ -95,7 +95,7 @@
         <a href="/docs">Docs</a>
         <a href="/docs/mcp">MCP</a>
         <a href="/pricing">Pricing</a>
-        <a href="https://github.com/Relaticle/relaticle" target="_blank" rel="noopener">GitHub</a>
+        <a href="https://github.com/combinedperception/relaticle" target="_blank" rel="noopener">GitHub</a>
     </div>
 </nav>
 

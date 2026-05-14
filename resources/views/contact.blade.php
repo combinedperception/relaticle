@@ -3,9 +3,9 @@
 @endpush
 
 <x-guest-layout
-    title="Contact Us - Relaticle"
-    description="Get in touch with the Relaticle team. Questions about enterprise deployments, custom integrations, or partnerships."
-    ogTitle="Contact Us - Relaticle"
+    title="Contact Us - Combined Perception"
+    description="Get in touch with Combined Perception. Questions about early access, enterprise deployments, or partnerships."
+    ogTitle="Contact Us - Combined Perception"
 >
     <section class="relative pt-32 pb-24 md:pt-40 md:pb-32 bg-white dark:bg-gray-950 overflow-hidden">
         <div class="absolute inset-0 bg-[linear-gradient(to_right,rgba(0,0,0,0.015)_1px,transparent_1px),linear-gradient(to_bottom,rgba(0,0,0,0.015)_1px,transparent_1px)] dark:bg-[linear-gradient(to_right,rgba(255,255,255,0.025)_1px,transparent_1px),linear-gradient(to_bottom,rgba(255,255,255,0.025)_1px,transparent_1px)] bg-[size:3rem_3rem] [mask-image:radial-gradient(ellipse_70%_50%_at_50%_50%,black_30%,transparent_100%)]"></div>
@@ -29,11 +29,11 @@
                             Documentation
                         </a>
                         @endfeature
-                        <a href="{{ route('discord') }}" target="_blank" class="flex items-center gap-2 text-sm font-medium text-gray-600 dark:text-gray-400 hover:text-primary dark:hover:text-primary-400 transition-colors">
-                            <x-ri-discord-fill class="w-4 h-4"/>
-                            Join Discord community
+                        <a href="https://linkedin.com/company/combined-perception" target="_blank" rel="noopener" class="flex items-center gap-2 text-sm font-medium text-gray-600 dark:text-gray-400 hover:text-primary dark:hover:text-primary-400 transition-colors">
+                            <x-ri-linkedin-box-fill class="w-4 h-4"/>
+                            LinkedIn
                         </a>
-                        <a href="https://github.com/relaticle/relaticle" target="_blank" class="flex items-center gap-2 text-sm font-medium text-gray-600 dark:text-gray-400 hover:text-primary dark:hover:text-primary-400 transition-colors">
+                        <a href="https://github.com/combinedperception/relaticle" target="_blank" class="flex items-center gap-2 text-sm font-medium text-gray-600 dark:text-gray-400 hover:text-primary dark:hover:text-primary-400 transition-colors">
                             <x-ri-github-fill class="w-4 h-4"/>
                             GitHub repository
                         </a>

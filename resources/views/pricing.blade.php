@@ -1,7 +1,7 @@
 <x-guest-layout
-    title="Pricing - Relaticle"
-    description="Relaticle pricing. Free forever — self-hosted or cloud. No per-seat pricing. No usage limits."
-    ogTitle="Pricing - Relaticle"
+    title="Pricing - Combined Perception CRM"
+    description="Combined Perception CRM pricing. Self-hosted for enterprise teams."
+    ogTitle="Pricing - Combined Perception CRM"
 >
     <section class="relative pt-32 pb-24 md:pt-40 md:pb-32 bg-white dark:bg-gray-950 overflow-hidden">
         <div class="absolute inset-0 bg-[linear-gradient(to_right,rgba(0,0,0,0.015)_1px,transparent_1px),linear-gradient(to_bottom,rgba(0,0,0,0.015)_1px,transparent_1px)] dark:bg-[linear-gradient(to_right,rgba(255,255,255,0.025)_1px,transparent_1px),linear-gradient(to_bottom,rgba(255,255,255,0.025)_1px,transparent_1px)] bg-[size:3rem_3rem] [mask-image:radial-gradient(ellipse_70%_50%_at_50%_50%,black_30%,transparent_100%)]"></div>
@@ -162,7 +162,7 @@
                         </div>
                     </div>
 
-                    <x-marketing.button variant="secondary" href="https://github.com/relaticle/relaticle" icon="ri-github-fill" external>
+                    <x-marketing.button variant="secondary" href="https://github.com/combinedperception/relaticle" icon="ri-github-fill" external>
                         View on GitHub
                     </x-marketing.button>
                     </div>
