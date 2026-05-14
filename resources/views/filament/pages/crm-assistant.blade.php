@@ -244,8 +244,9 @@
                         {{ count($steps) }} steps
                     </span>
                 </div>
-                <x-heroicon-o-chevron-down class="w-4 h-4 text-gray-400 transition-transform duration-200"
-                                           :class="open ? 'rotate-180' : ''" />
+                <span class="inline-flex transition-transform duration-200" :class="open ? 'rotate-180' : ''">
+                    <x-heroicon-o-chevron-down class="w-4 h-4 text-gray-400" />
+                </span>
             </button>
 
             <div x-show="open" x-collapse>
