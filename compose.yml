@@ -26,7 +26,11 @@ services:
       REDIS_PORT: 6379
       CACHE_STORE: redis
       SESSION_DRIVER: redis
+      SESSION_ENCRYPT: "true"
+      SESSION_SECURE_COOKIE: "true"
       QUEUE_CONNECTION: redis
+      SANCTUM_TOKEN_EXPIRATION: ${SANCTUM_TOKEN_EXPIRATION:-43200}
+      # DB_SSLMODE: require  # uncomment when using an external/managed PostgreSQL
       MAIL_MAILER: ${MAIL_MAILER:-log}
       MAIL_HOST: ${MAIL_HOST:-}
       MAIL_PORT: ${MAIL_PORT:-587}
@@ -76,6 +80,7 @@ services:
       REDIS_HOST: redis
       REDIS_PASSWORD: ${REDIS_PASSWORD:-null}
       REDIS_PORT: 6379
+      SESSION_ENCRYPT: "true"
       QUEUE_CONNECTION: redis
       # Disable automations for worker container
       AUTORUN_ENABLED: "false"
@@ -113,6 +118,7 @@ services:
       REDIS_HOST: redis
       REDIS_PASSWORD: ${REDIS_PASSWORD:-null}
       REDIS_PORT: 6379
+      SESSION_ENCRYPT: "true"
       QUEUE_CONNECTION: redis
       # Disable automations for scheduler container
       AUTORUN_ENABLED: "false"
