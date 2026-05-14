@@ -1,6 +1,6 @@
 services:
   app:
-    image: ghcr.io/combinedperception/relaticle:latest
+    image: ghcr.io/combinedperception/relaticle:${IMAGE_TAG:-main}
     restart: unless-stopped
     ports:
       - "127.0.0.1:8080:8080"
@@ -58,7 +58,7 @@ services:
       start_period: 60s
 
   horizon:
-    image: ghcr.io/combinedperception/relaticle:latest
+    image: ghcr.io/combinedperception/relaticle:${IMAGE_TAG:-main}
     restart: unless-stopped
     command: ["php", "/var/www/html/artisan", "horizon"]
     stop_signal: SIGTERM
@@ -96,7 +96,7 @@ services:
       start_period: 10s
 
   scheduler:
-    image: ghcr.io/combinedperception/relaticle:latest
+    image: ghcr.io/combinedperception/relaticle:${IMAGE_TAG:-main}
     restart: unless-stopped
     command: ["php", "/var/www/html/artisan", "schedule:work"]
     stop_signal: SIGTERM

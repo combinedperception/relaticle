@@ -78,12 +78,17 @@ jobs:
     needs: [tests]
 
     steps:
+      - name: Resolve image tag
+        id: tag
+        run: echo "value=${GITHUB_SHA:0:7}" >> "$GITHUB_OUTPUT"
+
       - name: Deploy via SSH
         uses: appleboy/ssh-action@0ff4204d59e8e51228ff73bce53f80d53301dee2 # v1
         with:
           host: ${{ secrets.DEPLOY_HOST }}
           username: ${{ secrets.DEPLOY_USER }}
           key: ${{ secrets.DEPLOY_SSH_KEY }}
+          envs: IMAGE_TAG
           script: |
             cd /opt/em-crm
             docker compose pull
@@ -93,3 +98,5 @@ jobs:
             docker compose exec -T app php artisan route:cache
             docker compose exec -T app php artisan view:cache
             docker compose exec -T app php artisan event:cache
+        env:
+          IMAGE_TAG: ${{ steps.tag.outputs.value }}
