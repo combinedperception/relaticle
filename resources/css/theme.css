@@ -1,3 +1,11 @@
+/* CP Brand Tokens */
+:root {
+    --cp-navy: #172343;
+    --cp-navy-light: #1e2f54;
+    --cp-blue: #6171F7;
+    --cp-cyan: #10BAE9;
+}
+
 /* Theme Configuration */
 @theme {
     /* Font Family */

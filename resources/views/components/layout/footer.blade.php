@@ -1,36 +1,31 @@
-<!-- Minimalist Footer -->
 <footer class="py-12 md:py-16 border-t border-gray-100 dark:border-gray-900 bg-white dark:bg-gray-950">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div
-            class="grid grid-cols-1 md:grid-cols-12 gap-10 md:gap-8 pb-10 border-b border-gray-100 dark:border-gray-900">
-            <!-- Company Info -->
+        <div class="grid grid-cols-1 md:grid-cols-12 gap-10 md:gap-8 pb-10 border-b border-gray-100 dark:border-gray-900">
+
+            {{-- Company Info --}}
             <div class="md:col-span-5 space-y-5">
-                <a href="{{ url('/') }}" class="inline-flex w-fit" aria-label="Relaticle Home">
+                <a href="{{ url('/') }}" class="inline-flex w-fit" aria-label="Combined Perception CRM Home">
                     <x-brand.logo-lockup size="md" class="text-black dark:text-white" />
                 </a>
                 <p class="text-gray-500 dark:text-gray-400 text-sm leading-relaxed max-w-md">
-                    The open-source CRM built for AI agents. Self-hosted. No per-seat pricing. Yours to own.
+                    AI-native CRM for enterprise teams. Manage relationships and let AI agents operate your data in real time.
                 </p>
 
-                <!-- Social links - Simplified -->
                 <div class="flex space-x-4">
-                    <a href="https://github.com/Relaticle/relaticle" target="_blank" rel="noopener noreferrer"
+                    <a href="https://github.com/combinedperception" target="_blank" rel="noopener noreferrer"
                        class="text-gray-400 hover:text-primary dark:hover:text-primary-400 transition-colors"
                        aria-label="GitHub">
                         <x-ri-github-fill class="h-5 w-5" />
                     </a>
-                    <a href="https://x.com/relaticle" target="_blank" rel="noopener noreferrer" class="text-gray-400 hover:text-primary dark:hover:text-primary-400 transition-colors"
-                       aria-label="X">
-                        <x-ri-twitter-x-fill class="h-5 w-5" />
-                    </a>
-                    <a href="https://www.linkedin.com/company/relaticle" target="_blank" rel="noopener noreferrer" class="text-gray-400 hover:text-primary dark:hover:text-primary-400 transition-colors"
+                    <a href="https://linkedin.com/company/combined-perception" target="_blank" rel="noopener noreferrer"
+                       class="text-gray-400 hover:text-primary dark:hover:text-primary-400 transition-colors"
                        aria-label="LinkedIn">
                         <x-ri-linkedin-box-fill class="h-5 w-5" />
                     </a>
                 </div>
             </div>
 
-            <!-- Quick Links Column - Simplified -->
+            {{-- Quick Links --}}
             <div class="md:col-span-3">
                 <h3 class="font-medium text-xs text-black dark:text-white uppercase tracking-wider mb-4">
                     Quick Links
@@ -43,29 +38,21 @@
                         </a>
                     </li>
                     <li>
-                        <a href="{{ route('pricing') }}"
-                           class="text-gray-500 dark:text-gray-400 hover:text-primary dark:hover:text-primary-400 text-sm transition-colors">
-                            Pricing
-                        </a>
-                    </li>
-                    @feature(App\Features\Documentation::class)
-                    <li>
-                        <a href="{{ route('documentation.index') }}"
-                           class="text-gray-500 dark:text-gray-400 hover:text-primary dark:hover:text-primary-400 text-sm transition-colors">
-                            Documentation
-                        </a>
-                    </li>
-                    @endfeature
-                    <li>
                         <a href="{{ url('/#features') }}"
                            class="text-gray-500 dark:text-gray-400 hover:text-primary dark:hover:text-primary-400 text-sm transition-colors">
-                            Features
+                            Capabilities
+                        </a>
+                    </li>
+                    <li>
+                        <a href="{{ url('/#architecture') }}"
+                           class="text-gray-500 dark:text-gray-400 hover:text-primary dark:hover:text-primary-400 text-sm transition-colors">
+                            Architecture
                         </a>
                     </li>
                 </ul>
             </div>
 
-            <!-- Legal Links Column - Simplified -->
+            {{-- Legal --}}
             <div class="md:col-span-4">
                 <h3 class="font-medium text-xs text-black dark:text-white uppercase tracking-wider mb-4">
                     Support & Legal
@@ -93,11 +80,8 @@
             </div>
         </div>
 
-        <!-- Copyright section -->
         <div class="mt-8 flex flex-col md:flex-row md:justify-between items-center gap-4">
-            <p class="text-gray-500 dark:text-gray-400 text-xs">&copy; {{ date('Y') }} Relaticle. All rights
-                reserved.</p>
-
+            <p class="text-gray-500 dark:text-gray-400 text-xs">&copy; {{ date('Y') }} Combined Perception. All rights reserved.</p>
             <x-theme-switcher />
         </div>
     </div>

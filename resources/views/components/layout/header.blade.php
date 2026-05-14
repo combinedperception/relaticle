@@ -6,7 +6,7 @@
             <div class="flex items-center justify-between h-16">
 
                 <div class="flex flex-1 items-center">
-                    <a href="{{ url('/') }}" class="transition-opacity" aria-label="Relaticle Home">
+                    <a href="{{ url('/') }}" class="transition-opacity" aria-label="Combined Perception CRM Home">
                         <x-brand.logo-lockup size="md" class="text-black dark:text-white" />
                     </a>
                 </div>
@@ -14,23 +14,15 @@
                 <nav class="hidden md:flex items-center gap-1">
                     <a href="{{ url('/#features') }}"
                        class="px-4 py-1.5 text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white text-[13px] font-medium transition-colors">
-                        Features
+                        Capabilities
                     </a>
-                    <a href="{{ route('pricing') }}"
+                    <a href="{{ url('/#architecture') }}"
                        class="px-4 py-1.5 text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white text-[13px] font-medium transition-colors">
-                        Pricing
+                        Architecture
                     </a>
-                    @feature(App\Features\Documentation::class)
-                    <a href="{{ route('documentation.index') }}"
+                    <a href="{{ route('contact') }}"
                        class="px-4 py-1.5 text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white text-[13px] font-medium transition-colors">
-                        Documentation
-                    </a>
-                    @endfeature
-                    <a href="{{ route('discord') }}" target="_blank"
-                       class="px-4 py-1.5 text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white text-[13px] font-medium transition-colors flex items-center gap-1.5">
-                        <x-ri-discord-fill class="w-4 h-4"/>
-                        <span>Discord</span>
-                        <x-ri-arrow-right-up-line class="h-3 w-3 text-gray-400 dark:text-gray-600"/>
+                        Contact
                     </a>
                 </nav>
 
@@ -40,8 +32,8 @@
                             Sign In
                         </x-marketing.button>
 
-                        <x-marketing.button size="sm" href="{{ route('register') }}">
-                            Start for free
+                        <x-marketing.button size="sm" href="{{ route('contact') }}">
+                            Request Access
                         </x-marketing.button>
                     </div>
 

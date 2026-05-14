@@ -1,4 +1,4 @@
-@props(['title', 'description' => 'Relaticle - The open-source CRM built for AI agents. Self-hosted with MCP server, REST API, and 22 custom field types.', 'ogTitle' => null, 'ogDescription' => null, 'ogImage' => null])
+@props(['title', 'description' => 'Combined Perception CRM — AI-native relationship management for enterprise teams.', 'ogTitle' => null, 'ogDescription' => null, 'ogImage' => null])
 
 <!DOCTYPE html>
 <html lang="{{ str_replace('_', '-', app()->getLocale()) }}">
@@ -11,21 +11,21 @@
     <link rel="canonical" href="{{ url()->current() }}" />
 
     <!-- Open Graph Meta Tags -->
-    <meta property="og:title" content="{{ $ogTitle ?? $title ?? config('app.name', 'Relaticle') }}"/>
+    <meta property="og:title" content="{{ $ogTitle ?? $title ?? config('app.name', 'Combined Perception CRM') }}"/>
     <meta property="og:description" content="{{ $ogDescription ?? $description }}"/>
     <meta property="og:image" content="{{ $ogImage ?? url('/images/open-graph.jpg') }}"/>
     <meta property="og:url" content="{{ request()->getUri() }}"/>
     <meta property="og:type" content="website" />
-    <meta property="og:site_name" content="{{ config('app.name', 'Relaticle') }}" />
+    <meta property="og:site_name" content="{{ config('app.name', 'Combined Perception CRM') }}" />
     <meta property="og:locale" content="{{ str_replace('_', '-', app()->getLocale()) }}" />
 
     <!-- Twitter Card Meta Tags -->
     <meta name="twitter:card" content="summary_large_image" />
-    <meta name="twitter:title" content="{{ $ogTitle ?? $title ?? config('app.name', 'Relaticle') }}" />
+    <meta name="twitter:title" content="{{ $ogTitle ?? $title ?? config('app.name', 'Combined Perception CRM') }}" />
     <meta name="twitter:description" content="{{ $ogDescription ?? $description }}" />
     <meta name="twitter:image" content="{{ $ogImage ?? url('/images/open-graph.jpg') }}" />
 
-    <title>{{ $title ?? config('app.name', 'Relaticle - The Open-Source CRM Built for AI Agents') }}</title>
+    <title>{{ $title ?? config('app.name', 'Combined Perception CRM') }}</title>
     <link rel="icon" type="image/png" href="/favicon-96x96.png" sizes="96x96" />
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <link rel="shortcut icon" href="/favicon.ico" />

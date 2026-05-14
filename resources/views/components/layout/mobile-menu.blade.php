@@ -7,7 +7,7 @@
 
     {{-- Header --}}
     <div class="flex items-center justify-between h-16 px-4 shrink-0">
-        <a href="{{ url('/') }}" aria-label="Relaticle Home">
+        <a href="{{ url('/') }}" aria-label="Combined Perception CRM Home">
             <x-brand.logo-lockup size="md" class="text-black dark:text-white"/>
         </a>
         <button type="button" @click="mobileMenu = false"
@@ -21,8 +21,8 @@
     <nav class="flex-1 flex flex-col justify-center px-8">
         <div class="space-y-1">
             @foreach([
-                ['url' => url('/#features'), 'label' => 'Features'],
-                ['url' => route('pricing'), 'label' => 'Pricing'],
+                ['url' => url('/#features'), 'label' => 'Capabilities'],
+                ['url' => url('/#architecture'), 'label' => 'Architecture'],
                 ['url' => route('contact'), 'label' => 'Contact'],
             ] as $link)
                 <a href="{{ $link['url'] }}" @click="mobileMenu = false"
@@ -30,12 +30,6 @@
                     {{ $link['label'] }}
                 </a>
             @endforeach
-            @feature(App\Features\Documentation::class)
-                <a href="{{ route('documentation.index') }}" @click="mobileMenu = false"
-                   class="block text-[2rem] font-semibold text-gray-950 dark:text-white hover:text-primary dark:hover:text-primary-400 transition-colors py-2">
-                    Docs
-                </a>
-            @endfeature
         </div>
     </nav>
 
@@ -45,8 +39,8 @@
             <x-marketing.button variant="secondary" href="{{ route('login') }}">
                 Sign In
             </x-marketing.button>
-            <x-marketing.button href="{{ route('register') }}">
-                Start for free
+            <x-marketing.button href="{{ route('contact') }}">
+                Request Access
             </x-marketing.button>
         </div>
     </div>
