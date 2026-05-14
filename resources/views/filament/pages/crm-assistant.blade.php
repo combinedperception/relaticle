@@ -83,7 +83,7 @@
                     wire:loading.attr="disabled"
                     :disabled="$status === 'pending' || $status === 'running'"
                     icon="heroicon-o-play"
-                    color="white"
+                    color="gray"
                     size="sm"
                 >
                     @if($status === 'pending' || $status === 'running')
