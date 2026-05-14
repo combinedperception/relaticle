@@ -8,7 +8,7 @@ use Closure;
 use Illuminate\Http\Request;
 use Symfony\Component\HttpFoundation\Response;
 
-final class SecurityHeaders
+final readonly class SecurityHeaders
 {
     public function handle(Request $request, Closure $next): Response
     {
