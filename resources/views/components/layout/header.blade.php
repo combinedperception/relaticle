@@ -20,6 +20,10 @@
                        class="px-4 py-1.5 text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white text-[13px] font-medium transition-colors">
                         Architecture
                     </a>
+                    <a href="{{ route('guide') }}"
+                       class="px-4 py-1.5 text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white text-[13px] font-medium transition-colors">
+                        Guide
+                    </a>
                     <a href="{{ route('contact') }}"
                        class="px-4 py-1.5 text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white text-[13px] font-medium transition-colors">
                         Contact

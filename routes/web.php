@@ -7,6 +7,7 @@ use App\Http\Controllers\AcceptTeamInvitationController;
 use App\Http\Controllers\Auth\CallbackController;
 use App\Http\Controllers\Auth\RedirectController;
 use App\Http\Controllers\ContactController;
+use App\Http\Controllers\GuideController;
 use App\Http\Controllers\HomeController;
 use App\Http\Controllers\JoinTeamViaLinkController;
 use App\Http\Controllers\PrivacyPolicyController;
@@ -47,6 +48,7 @@ Route::middleware('guest')->group(function () {
 
 Route::middleware(ProvideMarkdownResponse::class)->group(function (): void {
     Route::get('/', HomeController::class);
+    Route::get('/guide', GuideController::class)->name('guide');
     Route::get('/terms-of-service', TermsOfServiceController::class)->name('terms.show');
     Route::get('/privacy-policy', PrivacyPolicyController::class)->name('policy.show');
     Route::get('/pricing', fn () => view('pricing'))->name('pricing');
