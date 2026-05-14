@@ -12,6 +12,7 @@ use App\Models\AgentRun;
 use App\Models\Company;
 use App\Models\User;
 use BackedEnum;
+use Filament\Notifications\Notification;
 use Filament\Pages\Page;
 use Illuminate\Support\Collection;
 use UnitEnum;
@@ -108,6 +109,11 @@ final class CrmAssistantPage extends Page
                 'content' => "Follow up: {$company->name}",
             ]);
         }
+
+        Notification::make()
+            ->success()
+            ->title('Recommendations applied')
+            ->send();
     }
 
     public function checkStatus(): void
