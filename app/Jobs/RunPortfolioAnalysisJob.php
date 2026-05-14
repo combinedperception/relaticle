@@ -23,13 +23,14 @@ final class RunPortfolioAnalysisJob implements ShouldQueue
     public function __construct(
         public readonly AgentRun $agentRun,
         public readonly User $user,
+        public readonly string $mode = 'insights',
     ) {}
 
     public function handle(PortfolioAnalysisAgent $agent): void
     {
         $this->agentRun->update(['status' => 'running']);
 
-        $agent->run($this->agentRun, $this->user);
+        $agent->run($this->agentRun, $this->user, $this->mode);
     }
 
     public function failed(): void

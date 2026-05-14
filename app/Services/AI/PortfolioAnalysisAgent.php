@@ -27,19 +27,27 @@ final readonly class PortfolioAnalysisAgent
         private CreateTask $createTask,
     ) {}
 
-    public function run(AgentRun $agentRun, User $actor): void
+    public function run(AgentRun $agentRun, User $actor, string $mode = 'insights'): void
     {
         Auth::login($actor);
 
         try {
             $team = $actor->currentTeam;
 
+            $isInsights = $mode === 'insights';
+
             $response = Prism::text()
                 ->using(Provider::Anthropic, 'claude-sonnet-4-6')
-                ->withTools($this->buildTools($agentRun, $actor, $team))
+                ->withTools($isInsights
+                    ? $this->buildInsightsTools($agentRun, $team)
+                    : $this->buildFullTools($agentRun, $actor, $team)
+                )
                 ->withMaxSteps(15)
-                ->withSystemPrompt($this->systemPrompt())
-                ->withPrompt('Analyse the full portfolio. Flag at-risk companies, create notes and tasks for each. End with a plain-text portfolio health summary.')
+                ->withSystemPrompt($isInsights ? $this->insightsSystemPrompt() : $this->fullSystemPrompt())
+                ->withPrompt($isInsights
+                    ? 'Analyse the full portfolio. Flag each at-risk company using flag_company_at_risk. End with a plain-text portfolio health summary.'
+                    : 'Analyse the full portfolio. Flag at-risk companies, create notes and tasks for each. End with a plain-text portfolio health summary.'
+                )
                 ->generate();
 
             $agentRun->update([
@@ -57,12 +65,121 @@ final readonly class PortfolioAnalysisAgent
     }
 
     /**
+     * Read-only tools for insights mode. Includes flag_company_at_risk instead of write tools.
+     *
      * @return array<int, Tool>
      */
-    private function buildTools(AgentRun $agentRun, User $actor, Team $team): array
+    private function buildInsightsTools(AgentRun $agentRun, Team $team): array
     {
         $teamId = $team->getKey();
 
+        return [
+            ...$this->readTools($agentRun, $teamId),
+
+            (new Tool)
+                ->as('flag_company_at_risk')
+                ->for('Flag a company as at-risk in the portfolio health report. Does not create any CRM records.')
+                ->withStringParameter('company_id', 'The company ID returned by list_portfolio_companies')
+                ->withStringParameter('reason', 'One to two sentences explaining the specific risk — professional tone')
+                ->withStringParameter('risk_level', 'Risk severity: "high" (no pipeline and silent), "medium" (stalled opp or no recent notes), or "low" (minor concern)')
+                ->using(function (string $company_id, string $reason, string $risk_level) use ($agentRun, $teamId): string {
+                    $company = Company::query()
+                        ->where('team_id', $teamId)
+                        ->findOrFail($company_id);
+
+                    $agentRun->appendStep([
+                        'type' => 'company_at_risk',
+                        'company' => $company->name,
+                        'company_id' => $company_id,
+                        'reason' => $reason,
+                        'risk_level' => $risk_level,
+                        'summary' => "[{$risk_level}] {$company->name}: {$reason}",
+                    ]);
+
+                    return "Flagged {$company->name} as {$risk_level} risk.";
+                }),
+        ];
+    }
+
+    /**
+     * Full tools for write mode. Includes create_company_note and create_follow_up_task.
+     *
+     * @return array<int, Tool>
+     */
+    private function buildFullTools(AgentRun $agentRun, User $actor, Team $team): array
+    {
+        $teamId = $team->getKey();
+
+        return [
+            ...$this->readTools($agentRun, $teamId),
+
+            (new Tool)
+                ->as('create_company_note')
+                ->for('Create a note on a company summarising the risk assessment and recommended action')
+                ->withStringParameter('company_id', 'The company ID to attach the note to')
+                ->withStringParameter('content', 'The note content — keep under 3 sentences, professional tone')
+                ->using(function (string $company_id, string $content) use ($agentRun, $actor, $teamId): string {
+                    $company = Company::query()
+                        ->where('team_id', $teamId)
+                        ->findOrFail($company_id);
+
+                    $agentRun->appendStep(['type' => 'tool_call', 'tool' => 'create_company_note', 'summary' => "Creating note on {$company->name}"]);
+
+                    $note = $this->createNote->execute($actor, [
+                        'title' => $content,
+                        'company_ids' => [$company_id],
+                    ], CreationSource::MCP);
+
+                    $agentRun->appendStep([
+                        'type' => 'record_created',
+                        'entity_type' => 'note',
+                        'entity_id' => $note->getKey(),
+                        'company' => $company->name,
+                        'summary' => "Note created on {$company->name}",
+                        'content' => $content,
+                    ]);
+
+                    return "Note created on {$company->name} (id: {$note->getKey()})";
+                }),
+
+            (new Tool)
+                ->as('create_follow_up_task')
+                ->for('Create a follow-up task for a company with a specific action item')
+                ->withStringParameter('company_id', 'The company ID to link the task to')
+                ->withStringParameter('title', 'A specific, actionable task title')
+                ->using(function (string $company_id, string $title) use ($agentRun, $actor, $teamId): string {
+                    $company = Company::query()
+                        ->where('team_id', $teamId)
+                        ->findOrFail($company_id);
+
+                    $agentRun->appendStep(['type' => 'tool_call', 'tool' => 'create_follow_up_task', 'summary' => "Creating task for {$company->name}"]);
+
+                    $task = $this->createTask->execute($actor, [
+                        'title' => $title,
+                        'company_ids' => [$company_id],
+                    ], CreationSource::MCP);
+
+                    $agentRun->appendStep([
+                        'type' => 'record_created',
+                        'entity_type' => 'task',
+                        'entity_id' => $task->getKey(),
+                        'company' => $company->name,
+                        'summary' => "Task created for {$company->name}",
+                        'content' => $title,
+                    ]);
+
+                    return "Task created for {$company->name} (id: {$task->getKey()})";
+                }),
+        ];
+    }
+
+    /**
+     * Read-only tools shared by both modes.
+     *
+     * @return array<int, Tool>
+     */
+    private function readTools(AgentRun $agentRun, string $teamId): array
+    {
         return [
             (new Tool)
                 ->as('list_portfolio_companies')
@@ -178,68 +295,32 @@ final readonly class PortfolioAnalysisAgent
 
                     return json_encode($details) ?: '{}';
                 }),
-
-            (new Tool)
-                ->as('create_company_note')
-                ->for('Create a note on a company summarising the risk assessment and recommended action')
-                ->withStringParameter('company_id', 'The company ID to attach the note to')
-                ->withStringParameter('content', 'The note content — keep under 3 sentences, professional tone')
-                ->using(function (string $company_id, string $content) use ($agentRun, $actor, $teamId): string {
-                    $company = Company::query()
-                        ->where('team_id', $teamId)
-                        ->findOrFail($company_id);
-
-                    $agentRun->appendStep(['type' => 'tool_call', 'tool' => 'create_company_note', 'summary' => "Creating note on {$company->name}"]);
-
-                    $note = $this->createNote->execute($actor, [
-                        'title' => $content,
-                        'company_ids' => [$company_id],
-                    ], CreationSource::MCP);
-
-                    $agentRun->appendStep([
-                        'type' => 'record_created',
-                        'entity_type' => 'note',
-                        'entity_id' => $note->getKey(),
-                        'company' => $company->name,
-                        'summary' => "Note created on {$company->name}",
-                        'content' => $content,
-                    ]);
-
-                    return "Note created on {$company->name} (id: {$note->getKey()})";
-                }),
-
-            (new Tool)
-                ->as('create_follow_up_task')
-                ->for('Create a follow-up task for a company with a specific action item')
-                ->withStringParameter('company_id', 'The company ID to link the task to')
-                ->withStringParameter('title', 'A specific, actionable task title')
-                ->using(function (string $company_id, string $title) use ($agentRun, $actor, $teamId): string {
-                    $company = Company::query()
-                        ->where('team_id', $teamId)
-                        ->findOrFail($company_id);
-
-                    $agentRun->appendStep(['type' => 'tool_call', 'tool' => 'create_follow_up_task', 'summary' => "Creating task for {$company->name}"]);
-
-                    $task = $this->createTask->execute($actor, [
-                        'title' => $title,
-                        'company_ids' => [$company_id],
-                    ], CreationSource::MCP);
-
-                    $agentRun->appendStep([
-                        'type' => 'record_created',
-                        'entity_type' => 'task',
-                        'entity_id' => $task->getKey(),
-                        'company' => $company->name,
-                        'summary' => "Task created for {$company->name}",
-                        'content' => $title,
-                    ]);
-
-                    return "Task created for {$company->name} (id: {$task->getKey()})";
-                }),
         ];
     }
 
-    private function systemPrompt(): string
+    private function insightsSystemPrompt(): string
+    {
+        return <<<'PROMPT'
+        You are a CRM Portfolio Intelligence assistant for an investment firm.
+
+        Analyse the entire portfolio systematically:
+        1. Call list_portfolio_companies to get an overview of all companies
+        2. Call list_opportunities and list_overdue_tasks for context
+        3. For companies with no recent contact (>30 days) or stalled opportunities (>30 days since update), call get_company_details
+        4. For each at-risk company, call flag_company_at_risk with:
+           - company_id: the exact ID from list_portfolio_companies
+           - reason: 1–2 sentences explaining the specific risk (professional tone)
+           - risk_level: "high" (no pipeline and silent >30 days), "medium" (stalled opp or missing recent notes), "low" (minor concern)
+        5. End with a plain-text portfolio health summary: overall status, count of at-risk companies, key findings
+
+        Rules:
+        - Maximum 15 tool calls total
+        - Do NOT create notes or tasks — flag only
+        - Be decisive, not verbose
+        PROMPT;
+    }
+
+    private function fullSystemPrompt(): string
     {
         return <<<'PROMPT'
         You are a CRM Portfolio Intelligence assistant for an investment firm.

@@ -4,6 +4,7 @@
         $status  = $run?->status ?? 'idle';
         $steps   = $run?->steps ?? [];
         $summary = $this->getRunSummary();
+        $hasPending = $this->hasPendingRecommendations();
 
         // SVG health gauge
         $score        = $summary['health_score'] ?? 0;
@@ -44,7 +45,7 @@
                     </span>
                 </div>
                 <h1 class="text-2xl font-bold tracking-tight text-white md:text-3xl">Portfolio Intelligence</h1>
-                <p class="mt-1 text-sm text-white/60">Autonomous analysis · Real-time insights · Actionable results</p>
+                <p class="mt-1 text-sm text-white/60">Read insights first · Review · Apply to CRM when ready</p>
 
                 @if($run)
                     <p class="mt-3 text-xs text-white/40">
@@ -54,7 +55,7 @@
                 @endif
             </div>
 
-            <div class="flex items-center gap-3 shrink-0">
+            <div class="flex flex-col items-end gap-2 shrink-0">
                 {{-- Status badge --}}
                 @if($status === 'idle')
                     <span class="inline-flex items-center gap-1.5 rounded-full bg-white/10 px-3 py-1 text-xs font-medium text-white/70 backdrop-blur-sm border border-white/10">
@@ -69,7 +70,7 @@
                 @elseif($status === 'completed')
                     <span class="inline-flex items-center gap-1.5 rounded-full bg-success-500/20 px-3 py-1 text-xs font-medium text-success-300 backdrop-blur-sm border border-success-500/30">
                         <span class="w-1.5 h-1.5 rounded-full bg-success-400"></span>
-                        Completed
+                        @if($hasPending) Insights ready — review below @else Complete @endif
                     </span>
                 @elseif($status === 'failed')
                     <span class="inline-flex items-center gap-1.5 rounded-full bg-danger-500/20 px-3 py-1 text-xs font-medium text-danger-300 backdrop-blur-sm border border-danger-500/30">
@@ -78,20 +79,37 @@
                     </span>
                 @endif
 
-                <x-filament::button
-                    wire:click="runAnalysis"
-                    wire:loading.attr="disabled"
-                    :disabled="$status === 'pending' || $status === 'running'"
-                    icon="heroicon-o-play"
-                    color="gray"
-                    size="sm"
-                >
-                    @if($status === 'pending' || $status === 'running')
-                        Analysing…
-                    @else
-                        Run Analysis
+                {{-- Action buttons row --}}
+                <div class="flex items-center gap-2">
+                    {{-- Apply Recommendations: only shown when pending --}}
+                    @if($hasPending)
+                        <x-filament::button
+                            wire:click="applyRecommendations"
+                            wire:confirm="Create notes and tasks for all flagged companies? This cannot be undone."
+                            icon="heroicon-o-bolt"
+                            color="success"
+                            size="sm"
+                        >
+                            Apply Recommendations
+                        </x-filament::button>
                     @endif
-                </x-filament::button>
+
+                    {{-- Run Insights --}}
+                    <x-filament::button
+                        wire:click="runInsights"
+                        wire:loading.attr="disabled"
+                        :disabled="$status === 'pending' || $status === 'running'"
+                        icon="heroicon-o-magnifying-glass"
+                        color="gray"
+                        size="sm"
+                    >
+                        @if($status === 'pending' || $status === 'running')
+                            Analysing…
+                        @else
+                            Run Insights
+                        @endif
+                    </x-filament::button>
+                </div>
             </div>
         </div>
     </div>
@@ -103,11 +121,14 @@
         {{-- Stat cards row --}}
         <div class="grid grid-cols-2 gap-3 lg:grid-cols-4">
             @php
+                $pendingCount = collect($summary['companies'])->filter(fn($c) => in_array($c['risk'], ['high','medium','low']))->count();
+                $appliedCount = collect($summary['companies'])->filter(fn($c) => $c['applied'] ?? false)->count();
+
                 $cards = [
-                    ['label' => 'Companies', 'value' => $summary['total'], 'icon' => 'heroicon-o-building-office-2', 'color' => 'info', 'bg' => 'bg-info-50 dark:bg-info-500/10', 'text' => 'text-info-600 dark:text-info-400'],
-                    ['label' => 'Healthy',   'value' => $summary['healthy'], 'icon' => 'heroicon-o-check-circle',     'color' => 'success', 'bg' => 'bg-success-50 dark:bg-success-500/10', 'text' => 'text-success-600 dark:text-success-400'],
-                    ['label' => 'At-Risk',   'value' => $summary['at_risk'], 'icon' => 'heroicon-o-exclamation-triangle', 'color' => $summary['at_risk'] === 0 ? 'success' : 'danger', 'bg' => $summary['at_risk'] === 0 ? 'bg-success-50 dark:bg-success-500/10' : 'bg-danger-50 dark:bg-danger-500/10', 'text' => $summary['at_risk'] === 0 ? 'text-success-600 dark:text-success-400' : 'text-danger-600 dark:text-danger-400'],
-                    ['label' => 'Actions',   'value' => $summary['actions'], 'icon' => 'heroicon-o-bolt', 'color' => 'primary', 'bg' => 'bg-primary-50 dark:bg-primary-500/10', 'text' => 'text-primary-600 dark:text-primary-400'],
+                    ['label' => 'Companies', 'value' => $summary['total'], 'icon' => 'heroicon-o-building-office-2', 'bg' => 'bg-info-50 dark:bg-info-500/10', 'text' => 'text-info-600 dark:text-info-400'],
+                    ['label' => 'Healthy',   'value' => $summary['healthy'], 'icon' => 'heroicon-o-check-circle', 'bg' => 'bg-success-50 dark:bg-success-500/10', 'text' => 'text-success-600 dark:text-success-400'],
+                    ['label' => 'Flagged',   'value' => $summary['at_risk'], 'icon' => 'heroicon-o-exclamation-triangle', 'bg' => $summary['at_risk'] === 0 ? 'bg-success-50 dark:bg-success-500/10' : 'bg-danger-50 dark:bg-danger-500/10', 'text' => $summary['at_risk'] === 0 ? 'text-success-600 dark:text-success-400' : 'text-danger-600 dark:text-danger-400'],
+                    ['label' => 'Applied',   'value' => $appliedCount ?: $summary['actions'], 'icon' => 'heroicon-o-bolt', 'bg' => 'bg-primary-50 dark:bg-primary-500/10', 'text' => 'text-primary-600 dark:text-primary-400'],
                 ];
             @endphp
 
@@ -185,7 +206,7 @@
                     </div>
                     <div class="flex items-center gap-1.5">
                         <span class="w-2 h-2 rounded-full bg-danger-500"></span>
-                        <span class="text-gray-600 dark:text-gray-300">{{ $summary['at_risk'] }} at-risk</span>
+                        <span class="text-gray-600 dark:text-gray-300">{{ $summary['at_risk'] }} flagged</span>
                     </div>
                 </div>
             </div>
@@ -198,32 +219,87 @@
                 <div class="divide-y divide-gray-50 dark:divide-white/5 max-h-[260px] overflow-y-auto">
                     @foreach($summary['companies'] as $i => $company)
                         @php
-                            $isAtRisk = $company['risk'] === 'at_risk';
+                            $risk = $company['risk'];
+                            $applied = $company['applied'] ?? false;
+
+                            $dotColor = match($risk) {
+                                'high'    => 'bg-danger-50 dark:bg-danger-500/10',
+                                'medium'  => 'bg-warning-50 dark:bg-warning-500/10',
+                                'low'     => 'bg-yellow-50 dark:bg-yellow-500/10',
+                                'applied' => 'bg-success-50 dark:bg-success-500/10',
+                                default   => 'bg-success-50 dark:bg-success-500/10',
+                            };
+                            $iconColor = match($risk) {
+                                'high'    => 'text-danger-500 dark:text-danger-400',
+                                'medium'  => 'text-warning-500 dark:text-warning-400',
+                                'low'     => 'text-yellow-500 dark:text-yellow-400',
+                                'applied' => 'text-success-500 dark:text-success-400',
+                                default   => 'text-success-500 dark:text-success-400',
+                            };
+                            $badgeClass = match($risk) {
+                                'high'    => 'bg-danger-50 dark:bg-danger-500/10 text-danger-700 dark:text-danger-400',
+                                'medium'  => 'bg-warning-50 dark:bg-warning-500/10 text-warning-700 dark:text-warning-400',
+                                'low'     => 'bg-yellow-50 dark:bg-yellow-500/10 text-yellow-700 dark:text-yellow-400',
+                                'applied' => 'bg-success-50 dark:bg-success-500/10 text-success-700 dark:text-success-400',
+                                default   => 'bg-success-50 dark:bg-success-500/10 text-success-700 dark:text-success-400',
+                            };
+                            $badgeLabel = match($risk) {
+                                'high'    => 'High Risk',
+                                'medium'  => 'Medium Risk',
+                                'low'     => 'Low Risk',
+                                'applied' => 'Applied ✓',
+                                default   => 'Healthy',
+                            };
                         @endphp
                         <div class="flex items-center justify-between px-5 py-3 opacity-0"
                              style="animation: fade-slide-in 0.3s ease-out {{ $i * 50 }}ms forwards;">
                             <div class="flex items-center gap-3">
-                                <div class="w-7 h-7 rounded-full flex items-center justify-center shrink-0
-                                            {{ $isAtRisk ? 'bg-danger-50 dark:bg-danger-500/10' : 'bg-success-50 dark:bg-success-500/10' }}">
-                                    @if($isAtRisk)
-                                        <x-heroicon-o-exclamation-triangle class="w-3.5 h-3.5 text-danger-500 dark:text-danger-400" />
+                                <div class="w-7 h-7 rounded-full flex items-center justify-center shrink-0 {{ $dotColor }}">
+                                    @if($risk === 'high')
+                                        <x-heroicon-o-exclamation-triangle class="w-3.5 h-3.5 {{ $iconColor }}" />
+                                    @elseif($risk === 'medium')
+                                        <x-heroicon-o-exclamation-circle class="w-3.5 h-3.5 {{ $iconColor }}" />
+                                    @elseif($risk === 'low')
+                                        <x-heroicon-o-information-circle class="w-3.5 h-3.5 {{ $iconColor }}" />
                                     @else
-                                        <x-heroicon-o-check-circle class="w-3.5 h-3.5 text-success-500 dark:text-success-400" />
+                                        <x-heroicon-o-check-circle class="w-3.5 h-3.5 {{ $iconColor }}" />
                                     @endif
                                 </div>
                                 <span class="text-sm font-medium text-gray-900 dark:text-white">{{ $company['name'] }}</span>
                             </div>
-                            <span class="inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium
-                                         {{ $isAtRisk
-                                            ? 'bg-danger-50 dark:bg-danger-500/10 text-danger-700 dark:text-danger-400'
-                                            : 'bg-success-50 dark:bg-success-500/10 text-success-700 dark:text-success-400' }}">
-                                {{ $isAtRisk ? 'At-Risk' : 'Healthy' }}
+                            <span class="inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium {{ $badgeClass }}">
+                                {{ $badgeLabel }}
                             </span>
                         </div>
                     @endforeach
                 </div>
             </div>
         </div>
+
+        {{-- Pending apply CTA banner --}}
+        @if($hasPending)
+            <div class="rounded-xl border border-primary-200 dark:border-primary-500/30 bg-primary-50 dark:bg-primary-500/5 p-4 flex items-center justify-between gap-4">
+                <div class="flex items-center gap-3">
+                    <div class="shrink-0 w-9 h-9 rounded-xl bg-primary-100 dark:bg-primary-500/20 flex items-center justify-center">
+                        <x-heroicon-o-bolt class="w-4 h-4 text-primary-600 dark:text-primary-400" />
+                    </div>
+                    <div>
+                        <p class="text-sm font-semibold text-primary-900 dark:text-primary-200">Recommendations ready</p>
+                        <p class="text-xs text-primary-700 dark:text-primary-400 mt-0.5">Review the flagged companies above, then apply to create notes and tasks in your CRM.</p>
+                    </div>
+                </div>
+                <x-filament::button
+                    wire:click="applyRecommendations"
+                    wire:confirm="Create notes and tasks for all flagged companies? This cannot be undone."
+                    icon="heroicon-o-bolt"
+                    color="primary"
+                    size="sm"
+                    class="shrink-0"
+                >
+                    Apply to CRM
+                </x-filament::button>
+            </div>
+        @endif
     @endif
 
     {{-- ═══════════════════════════════════════════════════
@@ -269,6 +345,10 @@
                                     <div class="w-5 h-5 rounded-full bg-gray-50 dark:bg-white/5 flex items-center justify-center">
                                         <x-heroicon-o-clipboard-document-list class="w-3 h-3 text-gray-400 dark:text-gray-500" />
                                     </div>
+                                @elseif($type === 'company_at_risk')
+                                    <div class="w-5 h-5 rounded-full bg-orange-50 dark:bg-orange-500/10 flex items-center justify-center">
+                                        <x-heroicon-o-flag class="w-3 h-3 text-orange-500 dark:text-orange-400" />
+                                    </div>
                                 @elseif($type === 'record_created')
                                     <div class="w-5 h-5 rounded-full bg-success-50 dark:bg-success-500/10 flex items-center justify-center">
                                         <x-heroicon-o-check-circle class="w-3 h-3 text-success-500 dark:text-success-400" />
@@ -284,6 +364,10 @@
                                 @if($type === 'record_created' && isset($step['company']))
                                     <p class="text-xs text-gray-400 dark:text-gray-500 mt-0.5">
                                         {{ ucfirst($step['entity_type'] ?? 'record') }} on {{ $step['company'] }}
+                                    </p>
+                                @elseif($type === 'company_at_risk' && isset($step['risk_level']))
+                                    <p class="text-xs text-gray-400 dark:text-gray-500 mt-0.5">
+                                        {{ ucfirst($step['risk_level']) }} risk · {{ $step['company'] ?? '' }}
                                     </p>
                                 @endif
                             </div>
@@ -337,7 +421,7 @@
             </div>
             <div>
                 <p class="text-sm font-medium text-gray-900 dark:text-white">No analysis yet</p>
-                <p class="text-xs text-gray-500 dark:text-gray-400 mt-0.5">Click "Run Analysis" to analyse your portfolio.</p>
+                <p class="text-xs text-gray-500 dark:text-gray-400 mt-0.5">Click "Run Insights" to analyse your portfolio and get a health report.</p>
             </div>
         </div>
     @endif
