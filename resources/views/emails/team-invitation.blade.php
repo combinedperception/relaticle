@@ -1,13 +1,23 @@
 @component('mail::message')
-{{ __('You\'ve been invited to join the :team team on Relaticle.', ['team' => $invitation->team->name]) }}
+# You've been invited to join {{ $invitation->team->name }}
+
+{{ $invitation->team->name }} is using the **Combined Perception CRM** — an AI-native relationship management platform currently in active development.
 
 @component('mail::button', ['url' => $acceptUrl])
-{{ __('Accept Invitation') }}
+Accept Invitation
 @endcomponent
 
 @if($invitation->expires_at)
-{{ __('This invitation expires :expiry.', ['expiry' => $invitation->expires_at->diffForHumans()]) }}
+This invitation expires {{ $invitation->expires_at->diffForHumans() }}.
 @endif
 
-{{ __('If you weren\'t expecting this, you can safely ignore this email.') }}
+---
+
+> **⚠️ Pre-Alpha Notice**
+> This platform is currently in a **proof-of-concept / pre-alpha stage** and is being tested internally. You may encounter incomplete features, rough edges, or unexpected behaviour. Your feedback is welcome and valuable as we continue building.
+
+If you weren't expecting this invitation, you can safely ignore this email.
+
+**Combined Perception**
+*Building AI-native tools for enterprise teams*
 @endcomponent
