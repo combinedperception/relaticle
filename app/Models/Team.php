@@ -80,7 +80,7 @@ final class Team extends JetstreamTeam implements HasAvatar
         'api', 'graphql', 'mcp', 'webhooks', 'developer', 'developers', 'connect', 'user', 'users',
 
         // Marketing & public
-        'home', 'welcome', 'features', 'demo', 'enterprise', 'pro',
+        'home', 'welcome', 'features', 'demo', 'enterprise', 'pro', 'guide',
         'careers', 'jobs', 'partners', 'affiliate', 'store', 'marketplace',
 
         // Communication
