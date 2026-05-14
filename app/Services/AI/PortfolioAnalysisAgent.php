@@ -72,7 +72,7 @@ final readonly class PortfolioAnalysisAgent
 
                     $companies = Company::query()
                         ->where('team_id', $teamId)
-                        ->with(['notes' => fn ($q) => $q->orderByDesc('created_at')->limit(1)])
+                        ->with(['notes' => fn ($q) => $q->orderByDesc('notes.created_at')->limit(1)])
                         ->withCount(['opportunities', 'tasks'])
                         ->get()
                         ->map(fn (Company $c): array => [
@@ -150,7 +150,7 @@ final readonly class PortfolioAnalysisAgent
                     $company = Company::query()
                         ->where('team_id', $teamId)
                         ->with([
-                            'notes' => fn ($q) => $q->orderByDesc('created_at')->limit(3),
+                            'notes' => fn ($q) => $q->orderByDesc('notes.created_at')->limit(3),
                             'opportunities',
                             'tasks',
                         ])
