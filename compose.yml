@@ -30,6 +30,7 @@ services:
       SESSION_SECURE_COOKIE: "true"
       QUEUE_CONNECTION: redis
       SANCTUM_TOKEN_EXPIRATION: ${SANCTUM_TOKEN_EXPIRATION:-43200}
+      ANTHROPIC_API_KEY: ${ANTHROPIC_API_KEY:-}
       # DB_SSLMODE: require  # uncomment when using an external/managed PostgreSQL
       MAIL_MAILER: ${MAIL_MAILER:-log}
       MAIL_HOST: ${MAIL_HOST:-}
@@ -82,6 +83,7 @@ services:
       REDIS_PORT: 6379
       SESSION_ENCRYPT: "true"
       QUEUE_CONNECTION: redis
+      ANTHROPIC_API_KEY: ${ANTHROPIC_API_KEY:-}
       # Disable automations for worker container
       AUTORUN_ENABLED: "false"
     volumes:
@@ -120,6 +122,7 @@ services:
       REDIS_PORT: 6379
       SESSION_ENCRYPT: "true"
       QUEUE_CONNECTION: redis
+      ANTHROPIC_API_KEY: ${ANTHROPIC_API_KEY:-}
       # Disable automations for scheduler container
       AUTORUN_ENABLED: "false"
     volumes:
