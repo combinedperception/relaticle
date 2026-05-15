@@ -201,6 +201,53 @@ test('user registering via invitation link gets mailcoach subscriber synced', fu
     });
 });
 
+test('registering via invitation link pre-fills the email field with the invitation email', function (): void {
+    $team = Team::factory()->create(['name' => 'Acme Corp']);
+    $invitation = TeamInvitation::factory()->create([
+        'team_id' => $team->id,
+        'email' => 'newuser@gmail.com',
+    ]);
+
+    $this->get(URL::signedRoute('team-invitations.accept', ['invitation' => $invitation]));
+
+    livewire(Register::class)
+        ->assertSet('data.email', 'newuser@gmail.com');
+});
+
+test('new user completing invitation registration is accepted into the team without 403', function (): void {
+    $owner = User::factory()->withPersonalTeam()->create();
+    $team = $owner->currentTeam;
+
+    $invitation = TeamInvitation::factory()->create([
+        'team_id' => $team->id,
+        'email' => 'invited@gmail.com',
+        'role' => 'editor',
+    ]);
+
+    $acceptUrl = URL::signedRoute('team-invitations.accept', ['invitation' => $invitation]);
+
+    $this->get($acceptUrl);
+
+    livewire(Register::class)
+        ->fillForm([
+            'name' => 'New Member',
+            'email' => 'invited@gmail.com',
+            'password' => 'password',
+            'passwordConfirmation' => 'password',
+        ])
+        ->call('register')
+        ->assertHasNoFormErrors();
+
+    /** @var User $newUser */
+    $newUser = User::where('email', 'invited@gmail.com')->firstOrFail();
+
+    $this->actingAs($newUser)
+        ->get($acceptUrl)
+        ->assertRedirect(config('fortify.home'));
+
+    expect($team->fresh()->hasUser($newUser))->toBeTrue();
+});
+
 test('user registering without invitation does not trigger subscriber sync', function (): void {
     Queue::fake([SyncSubscriberJob::class]);
     config()->set('mailcoach-sdk.enabled_subscribers_sync', true);

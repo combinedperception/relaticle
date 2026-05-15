@@ -34,13 +34,17 @@ final class Register extends BaseRegister
 
     protected function getEmailFormComponent(): TextInput
     {
+        $invitation = $this->getTeamInvitationFromSession();
+
         return TextInput::make('email')
             ->label(__('filament-panels::auth/pages/register.form.email.label'))
             ->email()
             ->rules(['email:rfc,dns'])
             ->required()
             ->maxLength(255)
-            ->unique($this->getUserModel());
+            ->unique($this->getUserModel())
+            ->default($invitation?->email)
+            ->readOnly(filled($invitation?->email));
     }
 
     public function getRegisterFormAction(): Action
