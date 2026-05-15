@@ -34,9 +34,14 @@ final readonly class AcceptTeamInvitationController
             Log::warning('Invitation email mismatch', [
                 'invitation_id' => $invitation->id,
                 'user_id' => $user->id,
+                'invited_email' => $invitation->email,
+                'user_email' => $user->email,
             ]);
 
-            abort(403, __('This invitation was sent to a different email address.'));
+            return view('teams.invitation-wrong-account', [
+                'invitedEmail' => $invitation->email,
+                'currentEmail' => $user->email,
+            ]);
         }
 
         abort_if($user->isScheduledForDeletion(), 403, __('You cannot accept team invitations while your account is scheduled for deletion.'));

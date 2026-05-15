@@ -62,7 +62,7 @@ test('null expires_at is treated as expired', function () {
         ->assertViewIs('teams.invitation-expired');
 });
 
-test('invitation with wrong email is rejected', function () {
+test('invitation with wrong email shows helpful wrong-account page', function () {
     $invitedUser = User::factory()->withPersonalTeam()->create(['email' => 'invited@example.com']);
     $wrongUser = User::factory()->withPersonalTeam()->create(['email' => 'wrong@example.com']);
 
@@ -75,7 +75,10 @@ test('invitation with wrong email is rejected', function () {
 
     $this->actingAs($wrongUser)
         ->get($acceptUrl)
-        ->assertForbidden();
+        ->assertOk()
+        ->assertViewIs('teams.invitation-wrong-account')
+        ->assertSee('invited@example.com')
+        ->assertSee('wrong@example.com');
 
     expect($this->team->fresh()->hasUser($wrongUser))->toBeFalse();
 });
