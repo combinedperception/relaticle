@@ -82,7 +82,7 @@ final class CrmAssistantPage extends Page
             }
 
             $note = $createNote->execute($user, [
-                'title' => $flaggedStep['reason'],
+                'title' => mb_substr($flaggedStep['reason'], 0, 255),
                 'company_ids' => [$company->getKey()],
             ], CreationSource::MCP);
 
