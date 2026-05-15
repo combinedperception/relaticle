@@ -7,6 +7,7 @@ use App\Filament\Pages\OpportunitiesBoard;
 use App\Models\CustomField;
 use App\Models\Opportunity;
 use App\Models\User;
+use Filament\Actions\Testing\TestAction;
 use Filament\Facades\Filament;
 use Relaticle\Flowforge\Board;
 
@@ -83,4 +84,49 @@ it('moves a card between columns via moveCard', function (): void {
         ->value($this->stageField->getValueColumn());
 
     expect($updatedValue)->toBe($qualification->getKey());
+});
+
+it('edit card action updates the opportunity name', function (): void {
+    $opportunity = Opportunity::factory()->recycle([$this->user, $this->team])->create(['name' => 'Old Name']);
+
+    livewire(OpportunitiesBoard::class)
+        ->callAction(
+            TestAction::make('edit')->arguments(['recordKey' => $opportunity->getKey()]),
+            data: ['name' => 'New Name'],
+        )
+        ->assertHasNoActionErrors();
+
+    expect($opportunity->fresh()->name)->toBe('New Name');
+});
+
+it('edit card action preserves existing custom field values when name changes', function (): void {
+    $amountField = CustomField::query()->forEntity(Opportunity::class)->where('code', OpportunityField::AMOUNT)->first();
+
+    $opportunity = Opportunity::factory()->recycle([$this->user, $this->team])->create();
+    $opportunity->saveCustomFieldValue($amountField, 50000);
+
+    livewire(OpportunitiesBoard::class)
+        ->callAction(
+            TestAction::make('edit')->arguments(['recordKey' => $opportunity->getKey()]),
+            data: ['name' => 'Updated Name'],
+        )
+        ->assertHasNoActionErrors();
+
+    $value = $opportunity->fresh()->customFieldValues()
+        ->where('custom_field_id', $amountField->getKey())
+        ->value($amountField->getValueColumn());
+
+    expect((float) $value)->toBe(50000.0);
+});
+
+it('delete card action soft-deletes the opportunity', function (): void {
+    $opportunity = Opportunity::factory()->recycle([$this->user, $this->team])->create();
+
+    livewire(OpportunitiesBoard::class)
+        ->callAction(
+            TestAction::make('delete')->arguments(['recordKey' => $opportunity->getKey()]),
+        )
+        ->assertHasNoActionErrors();
+
+    $this->assertSoftDeleted($opportunity);
 });

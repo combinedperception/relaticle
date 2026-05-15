@@ -7,6 +7,7 @@ use App\Filament\Pages\TasksBoard;
 use App\Models\CustomField;
 use App\Models\Task;
 use App\Models\User;
+use Filament\Actions\Testing\TestAction;
 use Filament\Facades\Filament;
 use Relaticle\Flowforge\Board;
 
@@ -96,4 +97,73 @@ it('moves a card between columns via moveCard', function (): void {
         ->value($this->statusField->getValueColumn());
 
     expect($updatedValue)->toBe($inProgress->getKey());
+});
+
+it('edit card action updates the task title', function (): void {
+    $task = Task::factory()->recycle([$this->user, $this->team])->create(['title' => 'Old Title']);
+
+    livewire(TasksBoard::class)
+        ->callAction(
+            TestAction::make('edit')->arguments(['recordKey' => $task->getKey()]),
+            data: ['title' => 'New Title'],
+        )
+        ->assertHasNoActionErrors();
+
+    expect($task->fresh()->title)->toBe('New Title');
+});
+
+it('edit card action preserves existing custom field values when title changes', function (): void {
+    $priorityField = CustomField::query()->forEntity(Task::class)->where('code', TaskField::PRIORITY)->first();
+    $highOption = $priorityField->options->firstWhere('name', 'High');
+
+    $task = Task::factory()->recycle([$this->user, $this->team])->create();
+    $task->saveCustomFieldValue($priorityField, $highOption->getKey());
+
+    livewire(TasksBoard::class)
+        ->callAction(
+            TestAction::make('edit')->arguments(['recordKey' => $task->getKey()]),
+            data: ['title' => 'Updated Title'],
+        )
+        ->assertHasNoActionErrors();
+
+    $value = $task->fresh()->customFieldValues()
+        ->where('custom_field_id', $priorityField->getKey())
+        ->value($priorityField->getValueColumn());
+
+    expect($value)->toBe($highOption->getKey());
+});
+
+it('edit card action syncs assignees', function (): void {
+    $task = Task::factory()->recycle([$this->user, $this->team])->create();
+    $task->assignees()->attach($this->user->id);
+
+    $newAssignee = User::factory()->create();
+    $this->team->users()->attach($newAssignee);
+
+    livewire(TasksBoard::class)
+        ->callAction(
+            TestAction::make('edit')->arguments(['recordKey' => $task->getKey()]),
+            data: [
+                'title' => $task->title,
+                'assignees' => [$newAssignee->id],
+            ],
+        )
+        ->assertHasNoActionErrors();
+
+    $assigneeIds = $task->fresh()->assignees->pluck('id');
+    expect($assigneeIds)
+        ->toContain($newAssignee->id)
+        ->not->toContain($this->user->id);
+});
+
+it('delete card action soft-deletes the task', function (): void {
+    $task = Task::factory()->recycle([$this->user, $this->team])->create();
+
+    livewire(TasksBoard::class)
+        ->callAction(
+            TestAction::make('delete')->arguments(['recordKey' => $task->getKey()]),
+        )
+        ->assertHasNoActionErrors();
+
+    $this->assertSoftDeleted($task);
 });

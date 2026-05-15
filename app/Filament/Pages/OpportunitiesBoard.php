@@ -4,12 +4,15 @@ declare(strict_types=1);
 
 namespace App\Filament\Pages;
 
+use App\Actions\Opportunity\CreateOpportunity;
+use App\Actions\Opportunity\DeleteOpportunity;
+use App\Actions\Opportunity\UpdateOpportunity;
 use App\Enums\CustomFields\OpportunityField as OpportunityCustomField;
 use App\Filament\Resources\OpportunityResource\Forms\OpportunityForm;
 use App\Models\CustomField;
 use App\Models\CustomFieldOption;
 use App\Models\Opportunity;
-use App\Models\Team;
+use App\Models\User;
 use BackedEnum;
 use Exception;
 use Filament\Actions\Action;
@@ -143,11 +146,10 @@ final class OpportunitiesBoard extends BoardPage
                         ])
                         ->columns(2))
                     ->using(function (array $data, CreateAction $action): Opportunity {
-                        /** @var Team $currentTeam */
-                        $currentTeam = Auth::guard('web')->user()->currentTeam;
+                        /** @var User $user */
+                        $user = Auth::guard('web')->user();
 
-                        /** @var Opportunity $opportunity */
-                        $opportunity = $currentTeam->opportunities()->create($data);
+                        $opportunity = app(CreateOpportunity::class)->execute($user, $data);
 
                         $columnId = $action->getArguments()['column'] ?? null;
 
@@ -167,13 +169,19 @@ final class OpportunitiesBoard extends BoardPage
                     ->modalWidth(Width::ExtraLarge)
                     ->icon('heroicon-o-pencil-square')
                     ->schema(OpportunityForm::get(...))
-                    ->fillForm(fn (Opportunity $record): array => [
-                        'name' => $record->name,
-                        'company_id' => $record->company_id,
-                        'contact_id' => $record->contact_id,
-                    ])
+                    ->fillForm(function (Opportunity $record): array {
+                        $record->loadMissing('customFieldValues.customField');
+
+                        return [
+                            'name' => $record->name,
+                            'company_id' => $record->company_id,
+                            'contact_id' => $record->contact_id,
+                        ];
+                    })
                     ->action(function (Opportunity $record, array $data): void {
-                        $record->update($data);
+                        /** @var User $user */
+                        $user = Auth::guard('web')->user();
+                        app(UpdateOpportunity::class)->execute($user, $record, $data);
                     }),
                 Action::make('delete')
                     ->label('Delete')
@@ -181,7 +189,9 @@ final class OpportunitiesBoard extends BoardPage
                     ->color('danger')
                     ->requiresConfirmation()
                     ->action(function (Opportunity $record): void {
-                        $record->delete();
+                        /** @var User $user */
+                        $user = Auth::guard('web')->user();
+                        app(DeleteOpportunity::class)->execute($user, $record);
                     }),
             ])
             ->filters([
@@ -219,6 +229,8 @@ final class OpportunitiesBoard extends BoardPage
 
         $card = (clone $query)->find($cardId);
         throw_unless($card, InvalidArgumentException::class, "Card not found: {$cardId}");
+
+        abort_unless(auth()->user()->can('update', $card), 403);
 
         $newPosition = $this->calculatePositionBetweenCards($afterCardId, $beforeCardId, $targetColumnId);
 

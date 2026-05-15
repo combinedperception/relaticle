@@ -4,12 +4,15 @@ declare(strict_types=1);
 
 namespace App\Filament\Pages;
 
+use App\Actions\Task\CreateTask;
+use App\Actions\Task\DeleteTask;
+use App\Actions\Task\UpdateTask;
 use App\Enums\CustomFields\TaskField as TaskCustomField;
 use App\Filament\Resources\TaskResource\Forms\TaskForm;
 use App\Models\CustomField;
 use App\Models\CustomFieldOption;
 use App\Models\Task;
-use App\Models\Team;
+use App\Models\User;
 use BackedEnum;
 use Exception;
 use Filament\Actions\Action;
@@ -128,11 +131,23 @@ final class TasksBoard extends BoardPage
                     ->model(Task::class)
                     ->schema(fn (Schema $schema): Schema => TaskForm::get($schema, ['status']))
                     ->using(function (array $data, CreateAction $action): Task {
-                        /** @var Team $currentTeam */
-                        $currentTeam = Auth::guard('web')->user()->currentTeam;
+                        /** @var User $user */
+                        $user = Auth::guard('web')->user();
 
-                        /** @var Task $task */
-                        $task = $currentTeam->tasks()->create($data);
+                        if (array_key_exists('companies', $data)) {
+                            $data['company_ids'] = $data['companies'];
+                            unset($data['companies']);
+                        }
+                        if (array_key_exists('people', $data)) {
+                            $data['people_ids'] = $data['people'];
+                            unset($data['people']);
+                        }
+                        if (array_key_exists('assignees', $data)) {
+                            $data['assignee_ids'] = $data['assignees'];
+                            unset($data['assignees']);
+                        }
+
+                        $task = app(CreateTask::class)->execute($user, $data);
 
                         $columnId = $action->getArguments()['column'] ?? null;
 
@@ -152,11 +167,34 @@ final class TasksBoard extends BoardPage
                     ->modalWidth(Width::ThreeExtraLarge)
                     ->icon('heroicon-o-pencil-square')
                     ->schema(fn (Schema $schema): Schema => TaskForm::get($schema))
-                    ->fillForm(fn (Task $record): array => [
-                        'title' => $record->title,
-                    ])
+                    ->fillForm(function (Task $record): array {
+                        $record->loadMissing(['customFieldValues.customField', 'companies', 'people', 'assignees']);
+
+                        return [
+                            'title' => $record->title,
+                            'companies' => $record->companies->pluck('id')->toArray(),
+                            'people' => $record->people->pluck('id')->toArray(),
+                            'assignees' => $record->assignees->pluck('id')->toArray(),
+                        ];
+                    })
                     ->action(function (Task $record, array $data): void {
-                        $record->update($data);
+                        /** @var User $user */
+                        $user = Auth::guard('web')->user();
+
+                        if (array_key_exists('companies', $data)) {
+                            $data['company_ids'] = $data['companies'];
+                            unset($data['companies']);
+                        }
+                        if (array_key_exists('people', $data)) {
+                            $data['people_ids'] = $data['people'];
+                            unset($data['people']);
+                        }
+                        if (array_key_exists('assignees', $data)) {
+                            $data['assignee_ids'] = $data['assignees'];
+                            unset($data['assignees']);
+                        }
+
+                        app(UpdateTask::class)->execute($user, $record, $data);
                     }),
                 Action::make('delete')
                     ->label('Delete')
@@ -164,7 +202,9 @@ final class TasksBoard extends BoardPage
                     ->color('danger')
                     ->requiresConfirmation()
                     ->action(function (Task $record): void {
-                        $record->delete();
+                        /** @var User $user */
+                        $user = Auth::guard('web')->user();
+                        app(DeleteTask::class)->execute($user, $record);
                     }),
             ])
             ->filters([
@@ -199,6 +239,8 @@ final class TasksBoard extends BoardPage
         /** @var Task|null $card */
         $card = (clone $query)->with(['assignees'])->find($cardId);
         throw_unless($card, InvalidArgumentException::class, "Card not found: {$cardId}");
+
+        abort_unless(auth()->user()->can('update', $card), 403);
 
         // Calculate new position using DecimalPosition (via v3 trait helper)
         $newPosition = $this->calculatePositionBetweenCards($afterCardId, $beforeCardId, $targetColumnId);
