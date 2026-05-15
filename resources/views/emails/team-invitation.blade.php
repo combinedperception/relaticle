@@ -7,6 +7,9 @@
 Accept Invitation
 @endcomponent
 
+If the button above doesn't work, copy and paste this link into your browser:
+{{ $acceptUrl }}
+
 @if($invitation->expires_at)
 This invitation expires {{ $invitation->expires_at->diffForHumans() }}.
 @endif
