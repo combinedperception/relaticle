@@ -10,7 +10,10 @@ use App\Models\Concerns\HasCreator;
 use App\Models\Concerns\HasTeam;
 use App\Models\Concerns\InvalidatesRelatedAiSummaries;
 use App\Observers\TaskObserver;
+use App\Support\RichEditor\R2FileAttachmentProvider;
 use Database\Factories\TaskFactory;
+use Filament\Forms\Components\RichEditor\Models\Concerns\InteractsWithRichContent;
+use Filament\Forms\Components\RichEditor\Models\Contracts\HasRichContent;
 use Illuminate\Database\Eloquent\Attributes\ObservedBy;
 use Illuminate\Database\Eloquent\Attributes\Scope;
 use Illuminate\Database\Eloquent\Builder;
@@ -34,7 +37,7 @@ use Spatie\EloquentSortable\SortableTrait;
  * @method void saveCustomFieldValue(CustomField $field, mixed $value)
  */
 #[ObservedBy(TaskObserver::class)]
-final class Task extends Model implements HasCustomFields
+final class Task extends Model implements HasCustomFields, HasRichContent
 {
     use BelongsToTeamCreator;
     use HasCreator;
@@ -44,6 +47,7 @@ final class Task extends Model implements HasCustomFields
 
     use HasTeam;
     use HasUlids;
+    use InteractsWithRichContent;
     use InvalidatesRelatedAiSummaries;
     use SoftDeletes;
     use SortableTrait;
@@ -54,6 +58,12 @@ final class Task extends Model implements HasCustomFields
         'title',
         'creation_source',
     ];
+
+    protected function setUpRichContent(): void
+    {
+        $this->registerRichContent('custom_fields.description')
+            ->fileAttachmentProvider(new R2FileAttachmentProvider);
+    }
 
     /**
      * @var array<string, mixed>
