@@ -15,7 +15,7 @@
         "autoprefixer": "^10.5.0",
         "chokidar": "^5.0.0",
         "laravel-vite-plugin": "^3.0",
-        "playwright": "^1.59.1",
+        "playwright": "^1.60.0",
         "postcss": "^8.5.10",
         "postcss-nesting": "^14.0.0",
         "tailwindcss": "^4.2.2",
