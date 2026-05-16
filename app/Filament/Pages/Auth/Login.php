@@ -6,6 +6,7 @@ namespace App\Filament\Pages\Auth;
 
 use App\Concerns\DetectsTeamInvitation;
 use Filament\Actions\Action;
+use Filament\Forms\Components\TextInput;
 use Filament\Schemas\Components\Html;
 use Filament\Schemas\Components\RenderHook;
 use Filament\Schemas\Schema;
@@ -26,6 +27,19 @@ final class Login extends \Filament\Auth\Pages\Login
                 $this->getMultiFactorChallengeFormContentComponent(),
                 RenderHook::make(PanelsRenderHook::AUTH_LOGIN_FORM_AFTER),
             ]);
+    }
+
+    protected function getEmailFormComponent(): TextInput
+    {
+        $invitation = $this->getTeamInvitationFromSession();
+
+        return TextInput::make('email')
+            ->label(__('filament-panels::auth/pages/login.form.email.label'))
+            ->email()
+            ->required()
+            ->autocomplete()
+            ->autofocus()
+            ->default($invitation?->email);
     }
 
     protected function getAuthenticateFormAction(): Action
