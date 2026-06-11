@@ -13,6 +13,14 @@ jobs:
     runs-on: ubuntu-latest
     name: Line Coverage
 
+    # Coverage ratchet. Baseline at introduction was ~35%; the floor sits just
+    # below it so coverage can only hold or improve, never regress. Target is
+    # 80% — raise this number as real coverage climbs (bump it whenever the
+    # reported % clears the next step, e.g. 34 -> 40 -> 50 ... -> 80). Never set
+    # it above the current reported coverage, or every build goes red.
+    env:
+      COVERAGE_MIN: '34'
+
     services:
       postgres:
         image: postgres:alpine
@@ -71,26 +79,28 @@ jobs:
           php artisan key:generate
 
       # Runs the full non-browser suite with PCOV and emits a Clover report.
-      # Report-only: there is no minimum threshold yet — once a baseline is
-      # established here, add `--min=N` to ratchet coverage upward.
       #
-      # continue-on-error: this job only reports coverage; the authoritative
-      # test gate is the sharded `tests` matrix in tests.yml. A single
-      # environment-sensitive test (e.g. an export flake under the unsharded
-      # PCOV run) must not red the coverage report. Clover is still written
-      # after the run, so the summary below reflects the executed suite.
+      # continue-on-error: the authoritative test gate is the sharded `tests`
+      # matrix in tests.yml. A single environment-sensitive test (e.g. an export
+      # flake under the unsharded PCOV run) must not red the coverage job —
+      # the floor is enforced below against the coverage NUMBER, not the test
+      # pass/fail. Clover is still written after the run.
       - name: Run tests with coverage
         continue-on-error: true
         run: |
           vendor/bin/pest --parallel --coverage --coverage-clover=coverage.xml \
             --configuration phpunit.ci.xml --exclude-testsuite=Browser
 
-      - name: Summarize coverage
+      # Reports the coverage % and enforces the floor against the generated
+      # report. This is the real gate: it fails when coverage REGRESSES below
+      # COVERAGE_MIN, independent of any individual flaky test.
+      - name: Report and enforce coverage floor
         if: always()
         run: |
           if [ ! -f coverage.xml ]; then
-            echo "No coverage report produced (tests may have failed)." >> "$GITHUB_STEP_SUMMARY"
-            exit 0
+            echo "::error::No coverage report produced — the suite did not run to completion."
+            echo "No coverage report produced." >> "$GITHUB_STEP_SUMMARY"
+            exit 1
           fi
           PERCENT=$(php -r '
             $xml = simplexml_load_file("coverage.xml");
@@ -102,6 +112,13 @@ jobs:
           {
             echo "## Line coverage: ${PERCENT}%"
             echo ""
-            echo "_Report-only — no minimum threshold enforced yet._"
+            echo "Floor: **${COVERAGE_MIN}%** · Target: **80%**"
           } >> "$GITHUB_STEP_SUMMARY"
-          echo "Line coverage: ${PERCENT}%"
+          echo "Line coverage: ${PERCENT}% (floor ${COVERAGE_MIN}%, target 80%)"
+          if awk "BEGIN { exit !(${PERCENT} < ${COVERAGE_MIN}) }"; then
+            echo "::error::Line coverage ${PERCENT}% is below the floor of ${COVERAGE_MIN}%."
+            echo "" >> "$GITHUB_STEP_SUMMARY"
+            echo "❌ Below floor (${COVERAGE_MIN}%) — coverage regressed." >> "$GITHUB_STEP_SUMMARY"
+            exit 1
+          fi
+          echo "✅ At or above the ${COVERAGE_MIN}% floor." >> "$GITHUB_STEP_SUMMARY"
