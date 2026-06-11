@@ -10,6 +10,7 @@
 [![Laravel 13](https://img.shields.io/badge/Laravel-13-ff2d20?style=flat-square&logo=laravel&logoColor=white)](https://laravel.com)
 [![Filament 5](https://img.shields.io/badge/Filament-5-f59e0b?style=flat-square)](https://filamentphp.com)
 [![30 MCP Tools](https://img.shields.io/badge/MCP%20Tools-30-10BAE9?style=flat-square)](https://crm.combinedperception.ai/guide)
+[![Dependency Audit](https://img.shields.io/badge/deps-audited-3fb950?style=flat-square&logo=dependabot&logoColor=white)](.github/workflows/security.yml)
 [![Tests](https://img.shields.io/badge/Tests-1100%2B-28c840?style=flat-square)](https://github.com/combinedperception/relaticle/actions)
 [![AGPL-3.0](https://img.shields.io/badge/License-AGPL--3.0-blue?style=flat-square)](LICENSE)
 
