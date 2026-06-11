@@ -10,7 +10,7 @@ use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 use Livewire\Features\SupportFileUploads\TemporaryUploadedFile;
 
-final class R2FileAttachmentProvider implements FileAttachmentProvider
+final readonly class R2FileAttachmentProvider implements FileAttachmentProvider
 {
     private const DISK = 'r2';
 

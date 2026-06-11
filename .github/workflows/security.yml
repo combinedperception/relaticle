@@ -1,0 +1,67 @@
+name: Security
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+  schedule:
+    # Re-audit daily at 07:00 UTC so newly-published advisories against an
+    # unchanged lockfile are caught even when no PR is open.
+    - cron: '0 7 * * *'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  composer-audit:
+    runs-on: ubuntu-latest
+    name: Composer Dependency Audit
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@93cb6efe18208431cddfb8368fd83d5badbf9bfd # v5
+
+      - name: Cache Dependencies
+        uses: actions/cache@0057852bfaa89a56745cba8c7296529d2fc39830 # v4
+        with:
+          path: |
+            ~/.composer/cache
+            vendor
+          key: ${{ runner.os }}-php-8.4-composer-${{ hashFiles('composer.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-php-8.4-composer-
+
+      - name: Setup PHP
+        uses: shivammathur/setup-php@accd6127cb78bee3e8082180cb391013d204ef9f # v2
+        with:
+          php-version: 8.4
+          extensions: json, dom, curl, libxml, mbstring, zip
+          tools: composer:v2
+          coverage: none
+
+      - name: Install PHP dependencies
+        run: composer install --no-interaction --no-progress --ansi --prefer-dist --optimize-autoloader
+
+      # Audits the committed lock file against the Packagist advisory database.
+      # Fails the build on any known advisory and on abandoned packages.
+      - name: Run composer audit
+        run: composer audit --locked --abandoned=report --no-interaction --ansi
+
+  npm-audit:
+    runs-on: ubuntu-latest
+    name: NPM Dependency Audit
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@93cb6efe18208431cddfb8368fd83d5badbf9bfd # v5
+
+      - name: Set up Node & NPM
+        uses: actions/setup-node@a0853c24544627f65ddf259abe73b1d18a591444 # v5
+        with:
+          node-version: '22.x'
+
+      # Fails on "high" and "critical" advisories. Moderate/low are reported by
+      # Dependabot PRs but do not block merges.
+      - name: Run npm audit
+        run: npm audit --audit-level=high
