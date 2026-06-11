@@ -73,7 +73,14 @@ jobs:
       # Runs the full non-browser suite with PCOV and emits a Clover report.
       # Report-only: there is no minimum threshold yet — once a baseline is
       # established here, add `--min=N` to ratchet coverage upward.
+      #
+      # continue-on-error: this job only reports coverage; the authoritative
+      # test gate is the sharded `tests` matrix in tests.yml. A single
+      # environment-sensitive test (e.g. an export flake under the unsharded
+      # PCOV run) must not red the coverage report. Clover is still written
+      # after the run, so the summary below reflects the executed suite.
       - name: Run tests with coverage
+        continue-on-error: true
         run: |
           vendor/bin/pest --parallel --coverage --coverage-clover=coverage.xml \
             --configuration phpunit.ci.xml --exclude-testsuite=Browser
