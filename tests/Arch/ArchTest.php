@@ -178,6 +178,36 @@ arch('MCP tools must not use DB facade directly')
         'Illuminate\Support\Facades\DB',
     ]);
 
+// Keep raw SQL out of the UI layer — writes belong in action classes
+// (app/Actions). The grandfathered files use DB::transaction purely to wrap an
+// atomic operation, not to run business-logic queries; new violations are
+// blocked. The complementary "no inline $model->update()" rule is enforced by
+// the Claude PR reviewer, which Pest's dependency-based arch checks cannot express.
+arch('Filament must not use the DB facade directly')
+    ->expect('App\Filament')
+    ->not
+    ->toUse([
+        'Illuminate\Support\Facades\DB',
+    ])
+    ->ignoring([
+        // Atomic board-position reorder — UI orchestration of an atomic write.
+        'App\Filament\Pages\TasksBoard',
+        'App\Filament\Pages\OpportunitiesBoard',
+    ]);
+
+arch('Livewire must not use the DB facade directly')
+    ->expect('App\Livewire')
+    ->not
+    ->toUse([
+        'Illuminate\Support\Facades\DB',
+    ])
+    ->ignoring([
+        // Atomic personal-access-token creation.
+        'App\Livewire\App\AccessTokens\CreateAccessToken',
+        // Direct management of the framework sessions table (Jetstream pattern).
+        'App\Livewire\App\Profile\LogoutOtherBrowserSessions',
+    ]);
+
 arch('must not use custom-fields package models directly')
     ->expect([
         'App',
