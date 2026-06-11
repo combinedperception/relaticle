@@ -31,6 +31,15 @@ services:
       QUEUE_CONNECTION: redis
       SANCTUM_TOKEN_EXPIRATION: ${SANCTUM_TOKEN_EXPIRATION:-43200}
       ANTHROPIC_API_KEY: ${ANTHROPIC_API_KEY:-}
+      # Error tracking (Sentry) — an empty DSN disables it
+      SENTRY_LARAVEL_DSN: ${SENTRY_LARAVEL_DSN:-}
+      SENTRY_TRACES_SAMPLE_RATE: ${SENTRY_TRACES_SAMPLE_RATE:-0.2}
+      # Cloudflare R2 object storage (RichEditor attachments)
+      R2_ACCESS_KEY_ID: ${R2_ACCESS_KEY_ID:-}
+      R2_SECRET_ACCESS_KEY: ${R2_SECRET_ACCESS_KEY:-}
+      R2_BUCKET: ${R2_BUCKET:-}
+      R2_ENDPOINT: ${R2_ENDPOINT:-}
+      R2_URL: ${R2_URL:-}
       # DB_SSLMODE: require  # uncomment when using an external/managed PostgreSQL
       MAIL_MAILER: ${MAIL_MAILER:-log}
       MAIL_HOST: ${MAIL_HOST:-}
@@ -84,6 +93,15 @@ services:
       SESSION_ENCRYPT: "true"
       QUEUE_CONNECTION: redis
       ANTHROPIC_API_KEY: ${ANTHROPIC_API_KEY:-}
+      # Error tracking (Sentry) — an empty DSN disables it
+      SENTRY_LARAVEL_DSN: ${SENTRY_LARAVEL_DSN:-}
+      SENTRY_TRACES_SAMPLE_RATE: ${SENTRY_TRACES_SAMPLE_RATE:-0.2}
+      # Cloudflare R2 object storage (RichEditor attachments)
+      R2_ACCESS_KEY_ID: ${R2_ACCESS_KEY_ID:-}
+      R2_SECRET_ACCESS_KEY: ${R2_SECRET_ACCESS_KEY:-}
+      R2_BUCKET: ${R2_BUCKET:-}
+      R2_ENDPOINT: ${R2_ENDPOINT:-}
+      R2_URL: ${R2_URL:-}
       # Disable automations for worker container
       AUTORUN_ENABLED: "false"
     volumes:
@@ -123,6 +141,15 @@ services:
       SESSION_ENCRYPT: "true"
       QUEUE_CONNECTION: redis
       ANTHROPIC_API_KEY: ${ANTHROPIC_API_KEY:-}
+      # Error tracking (Sentry) — an empty DSN disables it
+      SENTRY_LARAVEL_DSN: ${SENTRY_LARAVEL_DSN:-}
+      SENTRY_TRACES_SAMPLE_RATE: ${SENTRY_TRACES_SAMPLE_RATE:-0.2}
+      # Cloudflare R2 object storage (RichEditor attachments)
+      R2_ACCESS_KEY_ID: ${R2_ACCESS_KEY_ID:-}
+      R2_SECRET_ACCESS_KEY: ${R2_SECRET_ACCESS_KEY:-}
+      R2_BUCKET: ${R2_BUCKET:-}
+      R2_ENDPOINT: ${R2_ENDPOINT:-}
+      R2_URL: ${R2_URL:-}
       # Disable automations for scheduler container
       AUTORUN_ENABLED: "false"
     volumes:
