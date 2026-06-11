@@ -1,0 +1,100 @@
+name: Coverage
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  coverage:
+    runs-on: ubuntu-latest
+    name: Line Coverage
+
+    services:
+      postgres:
+        image: postgres:alpine
+        env:
+          POSTGRES_DB: relaticle_testing
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_PORT: 5432
+          POSTGRES_USER: postgres
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+        ports:
+          - 5432:5432
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@93cb6efe18208431cddfb8368fd83d5badbf9bfd # v5
+
+      - name: Cache Dependencies
+        uses: actions/cache@0057852bfaa89a56745cba8c7296529d2fc39830 # v4
+        with:
+          path: |
+            ~/.composer/cache
+            vendor
+          key: ${{ runner.os }}-php-8.4-composer-${{ hashFiles('composer.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-php-8.4-composer-
+
+      - name: Setup PHP
+        uses: shivammathur/setup-php@accd6127cb78bee3e8082180cb391013d204ef9f # v2
+        with:
+          php-version: 8.4
+          extensions: json, dom, curl, libxml, mbstring, zip
+          tools: composer:v2
+          coverage: pcov
+
+      - name: Set up Node & NPM
+        uses: actions/setup-node@a0853c24544627f65ddf259abe73b1d18a591444 # v5
+        with:
+          node-version: '22.x'
+
+      - name: Install PHP dependencies
+        run: composer install --no-interaction --no-progress --ansi --prefer-dist --optimize-autoloader
+
+      - name: Install NPM dependencies
+        run: npm ci
+
+      - name: Build assets
+        run: npm run build
+
+      - name: Prepare Laravel
+        run: |
+          cp .env.ci .env
+          php artisan key:generate
+
+      # Runs the full non-browser suite with PCOV and emits a Clover report.
+      # Report-only: there is no minimum threshold yet — once a baseline is
+      # established here, add `--min=N` to ratchet coverage upward.
+      - name: Run tests with coverage
+        run: |
+          vendor/bin/pest --parallel --coverage --coverage-clover=coverage.xml \
+            --configuration phpunit.ci.xml --exclude-testsuite=Browser
+
+      - name: Summarize coverage
+        if: always()
+        run: |
+          if [ ! -f coverage.xml ]; then
+            echo "No coverage report produced (tests may have failed)." >> "$GITHUB_STEP_SUMMARY"
+            exit 0
+          fi
+          PERCENT=$(php -r '
+            $xml = simplexml_load_file("coverage.xml");
+            $m = $xml->project->metrics;
+            $statements = (int) $m["statements"];
+            $covered = (int) $m["coveredstatements"];
+            echo $statements > 0 ? number_format($covered / $statements * 100, 2) : "0.00";
+          ')
+          {
+            echo "## Line coverage: ${PERCENT}%"
+            echo ""
+            echo "_Report-only — no minimum threshold enforced yet._"
+          } >> "$GITHUB_STEP_SUMMARY"
+          echo "Line coverage: ${PERCENT}%"
