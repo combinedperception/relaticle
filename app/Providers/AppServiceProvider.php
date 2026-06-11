@@ -28,7 +28,6 @@ use App\Models\User;
 use App\Services\GitHubService;
 use Filament\Actions\Action;
 use Filament\Facades\Filament;
-use Filament\Forms\Components\RichEditor;
 use Illuminate\Auth\Events\Failed;
 use Illuminate\Auth\Events\Lockout;
 use Illuminate\Auth\Events\Login;
@@ -253,13 +252,6 @@ final class AppServiceProvider extends ServiceProvider
             return $action;
         });
 
-        // File attachments in RichEditor require HasRichContent on the model, which no model currently
-        // implements. Disable the button globally for custom field RichEditors to prevent a 500 error.
-        RichEditor::configureUsing(function (RichEditor $component): void {
-            if (str_starts_with($component->getName(), 'custom_fields.')) {
-                $component->disableToolbarButtons(['attachFiles']);
-            }
-        });
     }
 
     /**

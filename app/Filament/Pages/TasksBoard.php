@@ -147,7 +147,7 @@ final class TasksBoard extends BoardPage
                             unset($data['assignees']);
                         }
 
-                        $task = app(CreateTask::class)->execute($user, $data);
+                        $task = resolve(CreateTask::class)->execute($user, $data);
 
                         $columnId = $action->getArguments()['column'] ?? null;
 
@@ -194,7 +194,7 @@ final class TasksBoard extends BoardPage
                             unset($data['assignees']);
                         }
 
-                        app(UpdateTask::class)->execute($user, $record, $data);
+                        resolve(UpdateTask::class)->execute($user, $record, $data);
                     }),
                 Action::make('delete')
                     ->label('Delete')
@@ -204,7 +204,7 @@ final class TasksBoard extends BoardPage
                     ->action(function (Task $record): void {
                         /** @var User $user */
                         $user = Auth::guard('web')->user();
-                        app(DeleteTask::class)->execute($user, $record);
+                        resolve(DeleteTask::class)->execute($user, $record);
                     }),
             ])
             ->filters([

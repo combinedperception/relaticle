@@ -65,8 +65,8 @@ final class CrmAssistantPage extends Page
         $user = auth()->user();
         $teamId = $user->currentTeam->getKey();
 
-        $createNote = app(CreateNote::class);
-        $createTask = app(CreateTask::class);
+        $createNote = resolve(CreateNote::class);
+        $createTask = resolve(CreateTask::class);
 
         $flagged = collect($run->steps ?? [])
             ->filter(fn (array $s): bool => ($s['type'] ?? '') === 'company_at_risk');
@@ -82,7 +82,7 @@ final class CrmAssistantPage extends Page
             }
 
             $note = $createNote->execute($user, [
-                'title' => mb_substr($flaggedStep['reason'], 0, 255),
+                'title' => mb_substr((string) $flaggedStep['reason'], 0, 255),
                 'company_ids' => [$company->getKey()],
             ], CreationSource::MCP);
 
@@ -228,7 +228,7 @@ final class CrmAssistantPage extends Page
         $healthy = max(0, $total - $atRisk);
 
         $companies = $allCompanies->map(function (string $name) use ($atRiskNames, $appliedNames, $riskLevels): array {
-            if (! $atRiskNames->contains($name)) {
+            if ($atRiskNames->doesntContain($name)) {
                 return ['name' => $name, 'risk' => 'healthy', 'risk_level' => null, 'applied' => false];
             }
 
