@@ -1,0 +1,72 @@
+name: Claude Code Review
+
+on:
+  pull_request:
+    types: [opened, synchronize]
+
+# Review only: read the code, write comments on the PR.
+permissions:
+  contents: read
+  pull-requests: write
+  id-token: write
+
+jobs:
+  review:
+    runs-on: ubuntu-latest
+    name: Claude Review
+    steps:
+      - name: Checkout
+        uses: actions/checkout@93cb6efe18208431cddfb8368fd83d5badbf9bfd # v5
+        with:
+          fetch-depth: 1
+
+      - name: Claude review
+        uses: anthropics/claude-code-action@v1
+        with:
+          anthropic_api_key: ${{ secrets.ANTHROPIC_API_KEY }}
+          track_progress: true
+          prompt: |
+            REPO: ${{ github.repository }}
+            PR NUMBER: ${{ github.event.pull_request.number }}
+
+            You are reviewing a pull request for Relaticle, a production
+            Laravel 13 / Filament 5 / Livewire 4 / PHP 8.4 multi-tenant CRM with
+            paying customers. The PR branch is already checked out. Read
+            `CLAUDE.md` and the skills under `.github/skills/` for the project's
+            conventions before reviewing.
+
+            Focus your review on correctness and the failure modes that static
+            analysis (pint, rector, phpstan, type-coverage) cannot catch:
+
+            - **Business logic must go through action classes in `app/Actions/`.**
+              Flag any create/update/delete logic inlined in Filament resources,
+              Livewire components, controllers, or MCP tools. Native Filament
+              CreateAction/EditAction are fine only when they do a plain
+              create/update with no side effects; notifications and syncs must
+              run through the action.
+            - **Silent data loss.** Flag any Filament `fillForm` / save path that
+              hydrates only a subset of fields and then persists — it wipes the
+              untouched ones (custom fields, relationships).
+            - **Multi-tenant isolation.** Every query on a tenant-scoped model
+              must respect the team scope; flag cross-team data access (IDOR).
+            - **Authorization.** Write paths and board/card actions must check
+              policies (`can('update', $record)` etc.) — flag missing guards.
+            - **PostgreSQL-only, forward-only migrations** (no `down()`, no
+              SQLite/MySQL branches).
+            - **Custom fields:** models using `UsesCustomFields` handle
+              `custom_fields` automatically — flag manual `saveCustomFieldValue()`
+              or stripping in actions.
+            - General correctness: bugs, edge cases, N+1 queries, unhandled errors.
+
+            Report findings at the severity you actually believe them — include
+            lower-confidence items, but label confidence and severity so they can
+            be triaged. Do not nitpick pure style (pint/rector already enforce it).
+            If the PR looks clean, say so briefly.
+
+            Use `gh pr comment` for top-level summary feedback.
+            Use `mcp__github_inline_comment__create_inline_comment` (with
+            `confirmed: true`) for specific line-level issues.
+            Only post GitHub comments - don't submit review text as messages.
+
+          claude_args: |
+            --allowedTools "mcp__github_inline_comment__create_inline_comment,Bash(gh pr comment:*),Bash(gh pr diff:*),Bash(gh pr view:*)"
