@@ -12,9 +12,9 @@ use Livewire\Features\SupportFileUploads\TemporaryUploadedFile;
 
 final readonly class R2FileAttachmentProvider implements FileAttachmentProvider
 {
-    private const DISK = 'r2';
+    private const string DISK = 'r2';
 
-    private const DIRECTORY = 'rich-editor-attachments';
+    private const string DIRECTORY = 'rich-editor-attachments';
 
     public function attribute(RichContentAttribute $attribute): static
     {

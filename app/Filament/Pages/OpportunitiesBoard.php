@@ -149,7 +149,7 @@ final class OpportunitiesBoard extends BoardPage
                         /** @var User $user */
                         $user = Auth::guard('web')->user();
 
-                        $opportunity = app(CreateOpportunity::class)->execute($user, $data);
+                        $opportunity = resolve(CreateOpportunity::class)->execute($user, $data);
 
                         $columnId = $action->getArguments()['column'] ?? null;
 
@@ -181,7 +181,7 @@ final class OpportunitiesBoard extends BoardPage
                     ->action(function (Opportunity $record, array $data): void {
                         /** @var User $user */
                         $user = Auth::guard('web')->user();
-                        app(UpdateOpportunity::class)->execute($user, $record, $data);
+                        resolve(UpdateOpportunity::class)->execute($user, $record, $data);
                     }),
                 Action::make('delete')
                     ->label('Delete')
@@ -191,7 +191,7 @@ final class OpportunitiesBoard extends BoardPage
                     ->action(function (Opportunity $record): void {
                         /** @var User $user */
                         $user = Auth::guard('web')->user();
-                        app(DeleteOpportunity::class)->execute($user, $record);
+                        resolve(DeleteOpportunity::class)->execute($user, $record);
                     }),
             ])
             ->filters([

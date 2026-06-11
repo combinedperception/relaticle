@@ -14,6 +14,7 @@ use App\Models\Opportunity;
 use App\Models\Task;
 use App\Models\Team;
 use App\Models\User;
+use Illuminate\Database\Eloquent\Relations\Relation;
 use Illuminate\Support\Facades\Auth;
 use Prism\Prism\Enums\Provider;
 use Prism\Prism\Facades\Prism;
@@ -189,7 +190,7 @@ final readonly class PortfolioAnalysisAgent
 
                     $companies = Company::query()
                         ->where('team_id', $teamId)
-                        ->with(['notes' => fn ($q) => $q->orderByDesc('notes.created_at')->limit(1)])
+                        ->with(['notes' => fn (Relation $q): Relation => $q->latest('notes.created_at')->limit(1)])
                         ->withCount(['opportunities', 'tasks'])
                         ->get()
                         ->map(fn (Company $c): array => [
@@ -267,7 +268,7 @@ final readonly class PortfolioAnalysisAgent
                     $company = Company::query()
                         ->where('team_id', $teamId)
                         ->with([
-                            'notes' => fn ($q) => $q->orderByDesc('notes.created_at')->limit(3),
+                            'notes' => fn (Relation $q): Relation => $q->latest('notes.created_at')->limit(3),
                             'opportunities',
                             'tasks',
                         ])
